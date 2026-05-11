@@ -1,1495 +1,1067 @@
+html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>محرك البحث الائتماني المصري | أكواد الاستعلام 2025</title>
-  <meta name="description" content="بحث متقدم في أكواد الاستعلام الائتماني للبنوك والمؤسسات المالية المصرية" />
-
-  <!-- Google Fonts: Tajawal + IBM Plex Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
-
-  <!-- Fuse.js for fuzzy search -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
-
-  <style>
-    /* ========================================
-       CSS VARIABLES & RESET
-    ======================================== */
-    :root {
-      --bg-primary: #080c14;
-      --bg-secondary: #0d1520;
-      --bg-card: #111927;
-      --bg-card-hover: #16202e;
-      --bg-input: #0d1b2a;
-      --border: #1e2d3d;
-      --border-bright: #2a4060;
-      --text-primary: #e8f0fe;
-      --text-secondary: #8aa3bf;
-      --text-muted: #4a6580;
-      --accent: #3b82f6;
-      --accent-glow: rgba(59,130,246,0.15);
-      --accent-2: #06b6d4;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --gold: #f59e0b;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 20px;
-      --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
-      --shadow-glow: 0 0 40px rgba(59,130,246,0.08);
-      --font-main: 'Tajawal', sans-serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-      --transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-main);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      direction: rtl;
-      overflow-x: hidden;
-    }
-
-    /* Background grid pattern */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ========================================
-       HEADER
-    ======================================== */
-    header {
-      position: relative;
-      z-index: 10;
-      padding: 60px 24px 40px;
-      text-align: center;
-      background: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.12) 0%, transparent 70%);
-    }
-
-    .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(59,130,246,0.1);
-      border: 1px solid rgba(59,130,246,0.25);
-      border-radius: 100px;
-      padding: 6px 18px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 0.08em;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-    }
-
-    .logo-badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    h1 {
-      font-size: clamp(28px, 5vw, 52px);
-      font-weight: 900;
-      line-height: 1.15;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      letter-spacing: -0.02em;
-    }
-
-    h1 span {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      font-weight: 400;
-      max-width: 500px;
-      margin: 0 auto 16px;
-    }
-
-    .stats-row {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-
-    .stat-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 6px 14px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .stat-chip strong {
-      color: var(--text-primary);
-      font-weight: 700;
-    }
-
-    /* ========================================
-       SEARCH SECTION
-    ======================================== */
-    .search-section {
-      position: relative;
-      z-index: 10;
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 0 24px 32px;
-    }
-
-    .search-wrapper {
-      position: relative;
-    }
-
-    .search-box {
-      display: flex;
-      align-items: center;
-      background: var(--bg-input);
-      border: 1.5px solid var(--border-bright);
-      border-radius: var(--radius-lg);
-      padding: 6px 6px 6px 16px;
-      transition: var(--transition);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .search-box:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-glow);
-    }
-
-    .search-icon {
-      color: var(--text-muted);
-      font-size: 20px;
-      flex-shrink: 0;
-      margin-left: 12px;
-    }
-
-    #searchInput {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-family: var(--font-main);
-      font-size: 18px;
-      font-weight: 500;
-      padding: 12px 0;
-      caret-color: var(--accent);
-      direction: rtl;
-    }
-
-    #searchInput::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .btn-clear {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 18px;
-      transition: var(--transition);
-      display: none;
-    }
-
-    .btn-clear:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
-    .btn-clear.visible { display: flex; align-items: center; }
-
-    .btn-search {
-      background: linear-gradient(135deg, var(--accent), #2563eb);
-      border: none;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 14px;
-      font-family: var(--font-main);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .btn-search:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(59,130,246,0.4);
-    }
-
-    /* Autocomplete dropdown */
-    .autocomplete-dropdown {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0; right: 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      z-index: 100;
-      display: none;
-    }
-
-    .autocomplete-dropdown.open { display: block; }
-
-    .autocomplete-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: var(--transition);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .autocomplete-item:last-child { border-bottom: none; }
-    .autocomplete-item:hover, .autocomplete-item.active { background: rgba(59,130,246,0.1); }
-
-    .autocomplete-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .autocomplete-code {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--accent);
-      margin-right: auto;
-      margin-left: auto;
-    }
-
-    .autocomplete-cat {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* ========================================
-       FILTER BAR
-    ======================================== */
-    .filter-bar {
-      position: relative;
-      z-index: 9;
-      max-width: 760px;
-      margin: 0 auto 8px;
-      padding: 0 24px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .filter-label {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .filter-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 5px 14px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-      font-family: var(--font-main);
-    }
-
-    .chip:hover { border-color: var(--accent); color: var(--text-primary); }
-    .chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); font-weight: 700; }
-
-    /* ========================================
-       RECENT SEARCHES
-    ======================================== */
-    .recent-section {
-      position: relative;
-      z-index: 9;
-      max-width: 760px;
-      margin: 0 auto 24px;
-      padding: 0 24px;
-      display: none;
-    }
-
-    .recent-section.visible { display: block; }
-
-    .recent-title {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .recent-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .recent-chip {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 5px 14px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .recent-chip:hover { background: rgba(59,130,246,0.1); border-color: var(--accent); color: var(--text-primary); }
-
-    .btn-clear-recent {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 100px;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: var(--font-main);
-      transition: var(--transition);
-      margin-right: 8px;
-    }
-
-    .btn-clear-recent:hover { color: var(--danger); border-color: var(--danger); }
-
-    /* ========================================
-       RESULTS SECTION
-    ======================================== */
-    .results-section {
-      position: relative;
-      z-index: 9;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px 80px;
-    }
-
-    .results-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding: 16px 20px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-    }
-
-    .results-count {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .results-count .num {
-      font-family: var(--font-mono);
-      font-size: 20px;
-      color: var(--accent);
-    }
-
-    .results-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-export {
-      background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.3);
-      color: var(--success);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font-main);
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-export:hover { background: rgba(16,185,129,0.2); }
-
-    .sort-select {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: var(--font-main);
-      cursor: pointer;
-      outline: none;
-      transition: var(--transition);
-    }
-
-    .sort-select:hover { border-color: var(--accent); }
-
-    /* ========================================
-       CARDS GRID
-    ======================================== */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
-    }
-
-    .result-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-      animation: fadeInUp 0.3s ease forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-bright);
-      box-shadow: var(--shadow-card);
-      transform: translateY(-2px);
-    }
-
-    /* Colored left border accent */
-    .result-card::before {
-      content: '';
-      position: absolute;
-      right: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--card-accent, var(--accent));
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .card-icon {
-      font-size: 24px;
-      flex-shrink: 0;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-    }
-
-    .card-meta {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .card-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.4;
-      margin-bottom: 4px;
-    }
-
-    .card-category {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 100px;
-      border: 1px solid;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .card-code-block {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .code-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .code-value {
-      font-family: var(--font-mono);
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 0.08em;
-      direction: ltr;
-      text-align: left;
-    }
-
-    .code-value mark {
-      background: rgba(59,130,246,0.3);
-      color: #93c5fd;
-      border-radius: 3px;
-      padding: 0 2px;
-    }
-
-    .card-name mark {
-      background: rgba(59,130,246,0.2);
-      color: #93c5fd;
-      border-radius: 3px;
-      padding: 0 2px;
-    }
-
-    .card-source {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-bottom: 14px;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-copy {
-      flex: 1;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font-main);
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .btn-copy:hover { background: rgba(59,130,246,0.1); border-color: var(--accent); color: var(--text-primary); }
-    .btn-copy.copied { background: rgba(16,185,129,0.1); border-color: var(--success); color: var(--success); }
-
-    /* ========================================
-       EMPTY STATE
-    ======================================== */
-    .empty-state {
-      text-align: center;
-      padding: 80px 24px;
-      display: none;
-    }
-
-    .empty-state.visible { display: block; }
-
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
-    .empty-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .empty-desc {
-      font-size: 15px;
-      color: var(--text-muted);
-    }
-
-    /* ========================================
-       WELCOME STATE
-    ======================================== */
-    .welcome-state {
-      text-align: center;
-      padding: 40px 24px 60px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .welcome-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
-      margin-top: 32px;
-    }
-
-    .welcome-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 20px 16px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .welcome-card:hover {
-      border-color: var(--border-bright);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-    }
-
-    .welcome-card-icon { font-size: 28px; margin-bottom: 10px; }
-    .welcome-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-    .welcome-card-count { font-size: 12px; color: var(--text-muted); }
-
-    /* ========================================
-       LOADING
-    ======================================== */
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(8,12,20,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loading-overlay.visible { display: flex; }
-
-    .spinner {
-      width: 48px; height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ========================================
-       FOOTER
-    ======================================== */
-    footer {
-      position: relative;
-      z-index: 9;
-      text-align: center;
-      padding: 32px 24px;
-      border-top: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    footer strong { color: var(--text-secondary); }
-
-    /* ========================================
-       SCORE TABLE (bonus)
-    ======================================== */
-    .score-section {
-      max-width: 700px;
-      margin: 0 auto 40px;
-      padding: 0 24px;
-    }
-
-    .score-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .score-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    @media (max-width: 600px) { .score-grid { grid-template-columns: repeat(2, 1fr); } }
-
-    .score-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .score-range {
-      font-family: var(--font-mono);
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .score-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 700;
-    }
-
-    .score-risk {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* ========================================
-       RESPONSIVE
-    ======================================== */
-    @media (max-width: 640px) {
-      header { padding: 40px 16px 24px; }
-      .cards-grid { grid-template-columns: 1fr; }
-      .btn-search span { display: none; }
-      .results-header { flex-direction: column; align-items: flex-start; }
-    }
-
-    /* ========================================
-       TOAST NOTIFICATION
-    ======================================== */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--bg-card);
-      border: 1px solid var(--success);
-      border-radius: 100px;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--success);
-      z-index: 9999;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      white-space: nowrap;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-    }
-
-    .toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* ========================================
-       SCROLLBAR
-    ======================================== */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-primary); }
-    ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>أكواد الاستعلام الائتماني المصري 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<!-- PDF.js for PDF parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Fuse.js for fuzzy search -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+<style>
+:root {
+  --bg: #f5f7fa;
+  --bg2: #eef1f6;
+  --bg3: #e8ecf3;
+  --surface: #ffffff;
+  --surface2: #f9fafc;
+  --border: #dce2ec;
+  --border2: #c8d0e0;
+  --text: #1a2332;
+  --text2: #4a5568;
+  --text3: #8a96a8;
+  --blue: #1d6fdb;
+  --blue-light: #e8f1fd;
+  --blue-mid: #b3d0f7;
+  --teal: #0891b2;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --orange: #d97706;
+  --red: #dc2626;
+  --purple: #7c3aed;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow2: 0 4px 24px rgba(0,0,0,0.12);
+  --r: 10px;
+  --r2: 16px;
+  --font: 'Cairo', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --trans: all 0.18s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;overflow-x:hidden}
+
+/* ── HEADER ── */
+header{
+  background: linear-gradient(135deg, #1d6fdb 0%, #0e4fa8 50%, #0891b2 100%);
+  padding: 40px 24px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%);
+}
+.header-inner{position:relative;z-index:1;}
+.header-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);
+  border-radius:100px;padding:5px 16px;font-size:12px;font-weight:700;
+  color:#fff;letter-spacing:0.06em;margin-bottom:16px;
+}
+.header-badge::before{content:'';width:6px;height:6px;background:#7ee8a2;border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(22px,4.5vw,44px);font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px;letter-spacing:-0.01em}
+h1 em{font-style:normal;color:#a8d8ff}
+.subtitle{font-size:15px;color:rgba(255,255,255,0.8);max-width:480px;margin:0 auto 20px}
+.header-stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.hstat{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);
+  border-radius:100px;padding:5px 14px;font-size:13px;color:rgba(255,255,255,0.9)}
+.hstat strong{color:#fff;font-weight:700}
+
+/* ── SEARCH AREA ── */
+.search-wrap{
+  max-width:700px;margin:0 auto;
+  padding:28px 20px 16px;
+  position:relative;
+}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:2px solid var(--border2);
+  border-radius:var(--r2);padding:8px 8px 8px 14px;
+  box-shadow:var(--shadow2);transition:var(--trans);
+}
+.search-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,111,219,0.12),var(--shadow2)}
+.search-icon{font-size:20px;color:var(--text3);flex-shrink:0}
+#searchInput{
+  flex:1;border:none;outline:none;font-family:var(--font);
+  font-size:17px;font-weight:600;color:var(--text);background:transparent;
+  padding:8px 4px;caret-color:var(--blue);direction:rtl;
+}
+#searchInput::placeholder{color:var(--text3);font-weight:400}
+#btnClear{background:none;border:none;color:var(--text3);cursor:pointer;
+  padding:6px;border-radius:6px;font-size:16px;transition:var(--trans);display:none}
+#btnClear:hover{color:var(--red);background:rgba(220,38,38,0.08)}
+#btnClear.show{display:flex;align-items:center}
+.btn-search{
+  background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:10px 22px;font-family:var(--font);font-size:15px;font-weight:700;
+  cursor:pointer;transition:var(--trans);white-space:nowrap;flex-shrink:0
+}
+.btn-search:hover{background:#1557b8;transform:translateY(-1px);box-shadow:0 4px 16px rgba(29,111,219,0.35)}
+
+/* Autocomplete */
+.ac-drop{
+  position:absolute;top:calc(100% - 6px);right:20px;left:20px;
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:var(--r);box-shadow:var(--shadow2);z-index:200;display:none;overflow:hidden;
+}
+.ac-drop.open{display:block}
+.ac-item{
+  display:flex;align-items:center;gap:10px;padding:11px 16px;
+  cursor:pointer;border-bottom:1px solid var(--border);transition:var(--trans);
+}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.sel{background:var(--blue-light)}
+.ac-name{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.ac-code{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-light);padding:2px 7px;border-radius:4px}
+.ac-cat{font-size:11px;color:var(--text3)}
+
+/* ── FILTERS ── */
+.filter-area{max-width:700px;margin:0 auto;padding:0 20px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-label{font-size:12px;font-weight:700;color:var(--text3);white-space:nowrap}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1.5px solid var(--border2);border-radius:100px;
+  padding:5px 13px;font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── RECENT ── */
+.recent-area{max-width:700px;margin:0 auto;padding:0 20px 16px;display:none}
+.recent-area.show{display:block}
+.recent-head{font-size:12px;font-weight:700;color:var(--text3);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.recent-chips{display:flex;gap:6px;flex-wrap:wrap}
+.r-chip{background:var(--surface);border:1px solid var(--border2);border-radius:100px;
+  padding:4px 12px;font-size:12px;color:var(--text2);cursor:pointer;transition:var(--trans);
+  display:flex;align-items:center;gap:5px;font-family:var(--font)}
+.r-chip:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.btn-clr-r{background:none;border:1px solid var(--border2);border-radius:100px;
+  padding:3px 9px;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--font);transition:var(--trans)}
+.btn-clr-r:hover{color:var(--red);border-color:var(--red)}
+
+/* ── PDF UPLOAD ── */
+.upload-section{
+  max-width:900px;margin:0 auto 0;padding:0 20px 20px;
+}
+.upload-card{
+  background:var(--surface);border:2px dashed var(--border2);border-radius:var(--r2);
+  padding:20px;transition:var(--trans);cursor:pointer;
+}
+.upload-card:hover,.upload-card.drag{border-color:var(--blue);background:var(--blue-light)}
+.upload-inner{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.upload-icon{font-size:36px;flex-shrink:0}
+.upload-text h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+.upload-text p{font-size:12px;color:var(--text3)}
+.btn-upload{
+  margin-right:auto;background:var(--blue);color:#fff;border:none;border-radius:8px;
+  padding:9px 18px;font-family:var(--font);font-size:13px;font-weight:700;
+  cursor:pointer;transition:var(--trans);white-space:nowrap;
+}
+.btn-upload:hover{background:#1557b8}
+#fileInput{display:none}
+.upload-status{
+  margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;
+  font-weight:600;display:none;
+}
+.upload-status.ok{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0;display:block}
+.upload-status.err{background:#fef2f2;color:var(--red);border:1px solid #fecaca;display:block}
+.upload-status.loading{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);display:block}
+
+/* ── RESULTS HEADER ── */
+.res-head{
+  max-width:900px;margin:0 auto;padding:0 20px 12px;
+  display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.res-head.show{display:flex}
+.res-count{font-size:14px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px}
+.res-count .num{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue)}
+.res-actions{display:flex;gap:8px;align-items:center}
+.sort-sel{
+  background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;
+  padding:7px 12px;font-size:12px;font-family:var(--font);color:var(--text2);
+  cursor:pointer;outline:none;transition:var(--trans)
+}
+.sort-sel:hover{border-color:var(--blue)}
+.btn-exp{
+  background:var(--green-light);border:1.5px solid #a7f3d0;color:var(--green);
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:var(--font);transition:var(--trans);display:flex;align-items:center;gap:5px
+}
+.btn-exp:hover{background:#d1fae5}
+
+/* ── CARDS ── */
+.cards-grid{
+  max-width:900px;margin:0 auto;padding:0 20px 40px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;
+}
+.card{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);
+  padding:18px;transition:var(--trans);position:relative;overflow:hidden;
+  animation:fadeUp .25s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{box-shadow:var(--shadow2);border-color:var(--border2);transform:translateY(-2px)}
+.card::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:4px;
+  background:var(--card-ac,var(--blue));border-radius:0 var(--r2) var(--r2) 0;
+}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.card-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;background:var(--bg2)}
+.card-info{flex:1;min-width:0}
+.card-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:5px}
+.card-name mark,.code-val mark{background:rgba(29,111,219,0.15);color:var(--blue);
+  border-radius:3px;padding:0 2px;font-style:normal}
+.card-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:100px;border:1px solid;letter-spacing:0.04em}
+.code-block{background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.code-lbl{font-size:11px;font-weight:700;color:var(--text3)}
+.code-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue);
+  direction:ltr;text-align:left;letter-spacing:0.06em}
+.card-src{font-size:11px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.card-btns{display:flex;gap:7px}
+.btn-c{flex:1;background:var(--bg2);border:1.5px solid var(--border2);color:var(--text2);
+  padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:var(--font);transition:var(--trans);display:flex;align-items:center;justify-content:center;gap:4px}
+.btn-c:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.btn-c.done{background:var(--green-light);border-color:#a7f3d0;color:var(--green)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px;display:none}
+.empty.show{display:block}
+.empty-ic{font-size:52px;opacity:.4;margin-bottom:14px}
+.empty-t{font-size:18px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.empty-d{font-size:14px;color:var(--text3)}
+
+/* ── WELCOME ── */
+.welcome{max-width:900px;margin:0 auto;padding:10px 20px 40px}
+.welcome-t{font-size:13px;font-weight:700;color:var(--text3);margin-bottom:12px;text-align:center}
+.welcome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.w-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);
+  padding:16px;text-align:center;cursor:pointer;transition:var(--trans)}
+.w-card:hover{border-color:var(--blue);box-shadow:var(--shadow);transform:translateY(-2px)}
+.w-ic{font-size:26px;margin-bottom:8px}
+.w-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.w-cnt{font-size:11px;color:var(--text3)}
+
+/* ── SCORE TABLE ── */
+.score-sec{max-width:700px;margin:0 auto;padding:0 20px 40px}
+.score-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:10px;
+  display:flex;align-items:center;gap:6px}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:480px){.score-grid{grid-template-columns:repeat(2,1fr)}}
+.sc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:12px;display:flex;flex-direction:column;gap:3px}
+.sc-range{font-family:var(--mono);font-size:13px;font-weight:700}
+.sc-lbl{font-size:12px;font-weight:700}
+.sc-risk{font-size:11px;color:var(--text3)}
+
+/* ── FOOTER ── */
+footer{background:var(--surface);border-top:1.5px solid var(--border);
+  padding:24px;text-align:center;font-size:12px;color:var(--text3)}
+footer strong{color:var(--text2)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:#fff;border-radius:100px;padding:10px 22px;
+  font-size:13px;font-weight:700;z-index:9999;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .cards-grid{grid-template-columns:1fr}
+  .btn-search span{display:none}
+  .upload-inner{flex-direction:column;text-align:center}
+  .btn-upload{margin:0 auto}
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--blue)}
+</style>
 </head>
 <body>
 
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Header -->
-  <header>
-    <div class="logo-badge">محرك البحث الائتماني 2025</div>
-    <h1>أكواد الاستعلام <span>الائتماني المصري</span></h1>
-    <p class="subtitle">بحث فوري وذكي في جميع أكواد البنوك والمؤسسات المالية المصرية</p>
-    <div class="stats-row">
-      <div class="stat-chip">🏦 <strong id="totalCount">192</strong> مؤسسة</div>
-      <div class="stat-chip">📂 <strong>14</strong> تصنيف</div>
-      <div class="stat-chip">⚡ بحث فوري</div>
-      <div class="stat-chip">🔒 بدون إنترنت</div>
-    </div>
-  </header>
-
-  <!-- Search Section -->
-  <div class="search-section">
-    <div class="search-wrapper">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="ابحث باسم البنك، الشركة، أو الكود..."
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="btn-clear" id="btnClear" title="مسح">✕</button>
-        <button class="btn-search" id="btnSearch">
-          <span>بحث</span>
-        </button>
-      </div>
-      <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">محرك البحث الائتماني 2025</div>
+    <h1>أكواد الاستعلام <em>الائتماني المصري</em></h1>
+    <p class="subtitle">بحث فوري في أكواد البنوك والمؤسسات المالية المصرية</p>
+    <div class="header-stats">
+      <div class="hstat">🏦 <strong id="hTotal">192</strong> مؤسسة</div>
+      <div class="hstat">📂 <strong>14</strong> تصنيف</div>
+      <div class="hstat">⚡ بحث فوري</div>
+      <div class="hstat">📄 رفع PDF</div>
     </div>
   </div>
+</header>
 
-  <!-- Filter Bar -->
-  <div class="filter-bar">
-    <span class="filter-label">تصفية:</span>
-    <div class="filter-chips" id="filterChips">
-      <button class="chip active" data-filter="all">الكل</button>
-      <button class="chip" data-filter="بنك عام">بنوك عامة</button>
-      <button class="chip" data-filter="بنك تجاري">بنوك تجارية</button>
-      <button class="chip" data-filter="بنك استثماري">بنوك استثمارية</button>
-      <button class="chip" data-filter="بنك أجنبي">بنوك أجنبية</button>
-      <button class="chip" data-filter="بنك متخصص">بنوك متخصصة</button>
-      <button class="chip" data-filter="تمويل متناهي الصغر">تمويل صغير</button>
-      <button class="chip" data-filter="تمويل عقاري">عقاري</button>
-      <button class="chip" data-filter="تأجير تمويلي">تأجير</button>
-      <button class="chip" data-filter="ائتمان واستهلاك">ائتمان</button>
-      <button class="chip" data-filter="إسكان وتعمير">إسكان</button>
-    </div>
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الكود... مثال: كاش، بنك مصر، 00020011MF" autocomplete="off"/>
+    <button id="btnClear" title="مسح">✕</button>
+    <button class="btn-search" id="btnSearch"><span>بحث</span></button>
   </div>
+  <div class="ac-drop" id="acDrop"></div>
+</div>
 
-  <!-- Recent Searches -->
-  <div class="recent-section" id="recentSection">
-    <div class="recent-title">
-      🕐 عمليات البحث الأخيرة
-      <button class="btn-clear-recent" id="btnClearRecent">مسح الكل</button>
-    </div>
-    <div class="recent-chips" id="recentChips"></div>
+<!-- FILTERS -->
+<div class="filter-area">
+  <span class="filter-label">تصفية:</span>
+  <div class="filter-chips" id="filterChips">
+    <button class="chip on" data-f="all">الكل</button>
+    <button class="chip" data-f="بنك عام">بنوك عامة</button>
+    <button class="chip" data-f="بنك تجاري">بنوك تجارية</button>
+    <button class="chip" data-f="بنك استثماري">بنوك استثمارية</button>
+    <button class="chip" data-f="بنك أجنبي">بنوك أجنبية</button>
+    <button class="chip" data-f="بنك متخصص">بنوك متخصصة</button>
+    <button class="chip" data-f="تمويل متناهي الصغر">تمويل صغير</button>
+    <button class="chip" data-f="تمويل عقاري">عقاري</button>
+    <button class="chip" data-f="تأجير تمويلي">تأجير</button>
+    <button class="chip" data-f="ائتمان واستهلاك">ائتمان</button>
+    <button class="chip" data-f="إسكان وتعمير">إسكان</button>
+    <button class="chip" data-f="مستورد من PDF">➕ مضاف من PDF</button>
   </div>
+</div>
 
-  <!-- Results Section -->
-  <div class="results-section">
-    <!-- Results Header -->
-    <div class="results-header" id="resultsHeader" style="display:none">
-      <div class="results-count">
-        نتيجة <span class="num" id="resultsNum">0</span> من أصل <span class="num" id="totalNum">192</span>
+<!-- RECENT -->
+<div class="recent-area" id="recentArea">
+  <div class="recent-head">🕐 آخر عمليات البحث <button class="btn-clr-r" id="btnClrR">مسح الكل</button></div>
+  <div class="recent-chips" id="recentChips"></div>
+</div>
+
+<!-- PDF UPLOAD -->
+<div class="upload-section">
+  <div class="upload-card" id="uploadCard">
+    <div class="upload-inner">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">
+        <h3>إضافة أكواد من ملف PDF</h3>
+        <p>ارفع ملف PDF يحتوي على أكواد استعلام جديدة — سيتم استخراجها وإضافتها للبحث تلقائياً</p>
       </div>
-      <div class="results-actions">
-        <select class="sort-select" id="sortSelect">
-          <option value="relevance">ترتيب: الصلة</option>
-          <option value="name">الاسم أ-ي</option>
-          <option value="code">الكود</option>
-          <option value="category">التصنيف</option>
-        </select>
-        <button class="btn-export" id="btnExport">
-          📥 تصدير CSV
-        </button>
-      </div>
+      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">📂 رفع ملف PDF</button>
+      <input type="file" id="fileInput" accept=".pdf"/>
     </div>
-
-    <!-- Cards Grid -->
-    <div class="cards-grid" id="cardsGrid"></div>
-
-    <!-- Empty State -->
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">🔎</div>
-      <div class="empty-title">لا توجد نتائج</div>
-      <div class="empty-desc">جرّب البحث بكلمات مختلفة أو تحقق من الإملاء</div>
-    </div>
-
-    <!-- Welcome State -->
-    <div class="welcome-state" id="welcomeState">
-      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 4px;">تصفح حسب التصنيف</p>
-      <div class="welcome-grid" id="welcomeGrid"></div>
-    </div>
+    <div class="upload-status" id="uploadStatus"></div>
   </div>
+</div>
 
-  <!-- Credit Score Table -->
-  <div class="score-section">
-    <div class="score-title">📊 جدول تقييم الائتمان</div>
-    <div class="score-grid">
-      <div class="score-card">
-        <div class="score-range" style="color:#10b981">850 - 751</div>
-        <div class="score-label" style="color:#10b981">ممتاز</div>
-        <div class="score-risk">نسبة مخاطر: 2%</div>
-      </div>
-      <div class="score-card">
-        <div class="score-range" style="color:#3b82f6">750 - 701</div>
-        <div class="score-label" style="color:#3b82f6">جيد جداً</div>
-        <div class="score-risk">نسبة مخاطر: 208%</div>
-      </div>
-      <div class="score-card">
-        <div class="score-range" style="color:#06b6d4">700 - 626</div>
-        <div class="score-label" style="color:#06b6d4">مرضي</div>
-        <div class="score-risk">نسبة مخاطر: 5.1%</div>
-      </div>
-      <div class="score-card">
-        <div class="score-range" style="color:#f59e0b">625 - 521</div>
-        <div class="score-label" style="color:#f59e0b">غير مرضي</div>
-        <div class="score-risk">نسبة مخاطر: 25.8%</div>
-      </div>
-      <div class="score-card">
-        <div class="score-range" style="color:#ef4444">520 - 400</div>
-        <div class="score-label" style="color:#ef4444">مخاطر مرتفعة</div>
-        <div class="score-risk">نسبة مخاطر: 31.9%</div>
-      </div>
-      <div class="score-card">
-        <div class="score-range" style="color:#9f1239">399 - 300</div>
-        <div class="score-label" style="color:#9f1239">متعثر</div>
-        <div class="score-risk">نسبة مخاطر: 74.5%</div>
-      </div>
-    </div>
+<!-- RESULTS HEADER -->
+<div class="res-head" id="resHead">
+  <div class="res-count">نتيجة <span class="num" id="resNum">0</span> من أصل <span class="num" id="resTot">192</span></div>
+  <div class="res-actions">
+    <select class="sort-sel" id="sortSel">
+      <option value="rel">ترتيب: الصلة</option>
+      <option value="name">الاسم أ-ي</option>
+      <option value="code">الكود</option>
+      <option value="cat">التصنيف</option>
+    </select>
+    <button class="btn-exp" id="btnExp">📥 تصدير CSV</button>
   </div>
+</div>
 
-  <!-- Footer -->
-  <footer>
-    <p>إعداد / <strong>فادي عادل</strong> — أكواد الاستعلام الائتماني المصري 2025</p>
-    <p style="margin-top: 6px; font-size: 11px;">كاش للتمويل متناهي الصغر | بني سويف</p>
-  </footer>
+<!-- CARDS GRID -->
+<div class="cards-grid" id="cardsGrid"></div>
 
-  <!-- Data Script -->
-  <script src="data/codes.js"></script>
+<!-- EMPTY -->
+<div class="empty" id="emptyState">
+  <div class="empty-ic">🔎</div>
+  <div class="empty-t">لا توجد نتائج</div>
+  <div class="empty-d">جرّب كلمات مختلفة أو تحقق من الإملاء</div>
+</div>
 
-  <!-- Main Script -->
-  <script>
-  // ====================================================
-  // STATE
-  // ====================================================
-  let allData = CREDIT_DATA;
-  let activeFilter = 'all';
-  let currentResults = [];
-  let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-  let fuseInstance = null;
-  let autocompleteTimeout = null;
+<!-- WELCOME -->
+<div class="welcome" id="welcomeState">
+  <div class="welcome-t">تصفح حسب التصنيف</div>
+  <div class="welcome-grid" id="welcomeGrid"></div>
+</div>
 
-  // ====================================================
-  // ARABIC NORMALIZATION
-  // ====================================================
-  function normalizeArabic(text) {
-    if (!text) return '';
-    return text
-      .toLowerCase()
-      // Remove diacritics (tashkeel)
-      .replace(/[\u064B-\u065F\u0670]/g, '')
-      // Normalize Alef variants → ا
-      .replace(/[أإآاٱ]/g, 'ا')
-      // Ta marbuta → ه
-      .replace(/ة/g, 'ه')
-      // Alef maqsura → ي
-      .replace(/ى/g, 'ي')
-      // Normalize waw with hamza
-      .replace(/ؤ/g, 'و')
-      // Ya with hamza
-      .replace(/ئ/g, 'ي')
-      // Remove extra spaces
-      .replace(/\s+/g, ' ')
-      .trim();
+<!-- SCORE TABLE -->
+<div class="score-sec">
+  <div class="score-title">📊 جدول تقييم الائتمان</div>
+  <div class="score-grid">
+    <div class="sc"><div class="sc-range" style="color:#059669">850 - 751</div><div class="sc-lbl" style="color:#059669">ممتاز</div><div class="sc-risk">مخاطر: 2%</div></div>
+    <div class="sc"><div class="sc-range" style="color:#1d6fdb">750 - 701</div><div class="sc-lbl" style="color:#1d6fdb">جيد جداً</div><div class="sc-risk">مخاطر: 208%</div></div>
+    <div class="sc"><div class="sc-range" style="color:#0891b2">700 - 626</div><div class="sc-lbl" style="color:#0891b2">مرضي</div><div class="sc-risk">مخاطر: 5.1%</div></div>
+    <div class="sc"><div class="sc-range" style="color:#d97706">625 - 521</div><div class="sc-lbl" style="color:#d97706">غير مرضي</div><div class="sc-risk">مخاطر: 25.8%</div></div>
+    <div class="sc"><div class="sc-range" style="color:#dc2626">520 - 400</div><div class="sc-lbl" style="color:#dc2626">مخاطر مرتفعة</div><div class="sc-risk">مخاطر: 31.9%</div></div>
+    <div class="sc"><div class="sc-range" style="color:#7c3aed">399 - 300</div><div class="sc-lbl" style="color:#7c3aed">متعثر</div><div class="sc-risk">مخاطر: 74.5%</div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>إعداد / <strong>فادي عادل</strong> — كاش للتمويل متناهي الصغر | بني سويف</p>
+  <p style="margin-top:4px;font-size:11px">أكواد الاستعلام الائتماني المصري 2025</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA — كل البيانات مدمجة في الملف مباشرة
+// ══════════════════════════════════════════════
+const BASE_DATA = [
+  {id:1,name:"البنك المركزي المصري",code:"00990001RA",category:"بنك عام",source:"أكواد الاستعلام 2025"},
+  {id:2,name:"بنك الإسكندرية",code:"01000001PC",category:"بنك عام",source:"أكواد الاستعلام 2025"},
+  {id:3,name:"البنك الأهلي المصري",code:"02000001PC",category:"بنك عام",source:"أكواد الاستعلام 2025"},
+  {id:4,name:"بنك القاهرة",code:"03000001PC",category:"بنك عام",source:"أكواد الاستعلام 2025"},
+  {id:5,name:"بنك مصر",code:"04000001PC",category:"بنك عام",source:"أكواد الاستعلام 2025"},
+  {id:6,name:"البنك العقاري المصري العربي",code:"77000001SB",category:"بنك متخصص",source:"أكواد الاستعلام 2025"},
+  {id:7,name:"بنك التنمية الصناعية المصري",code:"80000001SB",category:"بنك متخصص",source:"أكواد الاستعلام 2025"},
+  {id:8,name:"البنك الزراعي المصري",code:"82010001SB",category:"بنك متخصص",source:"أكواد الاستعلام 2025"},
+  {id:9,name:"المصرف المتحد",code:"12800001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:10,name:"المصرف المتحد",code:"01280001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:11,name:"البنك التجاري الدولي - مصر",code:"13000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:12,name:"بنك بلوم - مصر",code:"14000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:13,name:"بنك الإمارات دبي الوطني",code:"15000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:14,name:"بنك قناة السويس",code:"17000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:15,name:"بنك عودة",code:"19000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:16,name:"البنك الأهلي المتحد",code:"20000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:17,name:"بنك فيصل الإسلامي (البنك الوطني للتنمية)",code:"23000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:18,name:"البنك الأهلي الكويتي (بيريوس)",code:"24000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:19,name:"مصرف أبو ظبي الإسلامي",code:"25000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:20,name:"مصرف أبو ظبي الإسلامي",code:"25010001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:21,name:"بنك البركة",code:"26000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:22,name:"بنك الكويت الوطني",code:"27000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:23,name:"بنك الاتحاد الوطني - مصر",code:"30000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:24,name:"البنك المصري الخليجي",code:"32000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:25,name:"بنك اتش اس بي سي - مصر",code:"33000001CB",category:"بنك تجاري",source:"أكواد الاستعلام 2025"},
+  {id:26,name:"التجاري وفا بنك ايجبت (باركليز)",code:"41000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:27,name:"بنك مصر ايران للتنمية",code:"42000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:28,name:"بنك الشركة المصرفية العربية الدولية",code:"43000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:29,name:"بنك كريدي اجريكول - مصر",code:"44000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:30,name:"بنك قطر الوطني الأهلي (سوسيتيه جنرال)",code:"45000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:31,name:"بنك الاستثمار العربي",code:"46000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:32,name:"بنك التعمير والإسكان",code:"47000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:33,name:"بنك المؤسسة العربية المصرفية",code:"49000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:34,name:"البنك المصري لتنمية الصادرات",code:"50000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:35,name:"البنك العربي الافريقي الدولي",code:"54000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:36,name:"بنك كريدي السويس فيرست",code:"56000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:37,name:"جمال ترست بنك",code:"58000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:38,name:"لويدز بنك بي ال سي",code:"60000001IB",category:"بنك استثماري",source:"أكواد الاستعلام 2025"},
+  {id:39,name:"ذي بنك اوف نوفا سكوشيا",code:"36000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:40,name:"البنك الوطني العماني",code:"37000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:41,name:"بنك المشرق",code:"38000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:42,name:"البنك العربي",code:"39000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:43,name:"بنك أبو ظبي الأول",code:"51000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:44,name:"ستي بنك ان ايه - مصر",code:"53000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:45,name:"البنك الأهلي اليوناني",code:"57000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:46,name:"البنك الأهلي الباكستاني",code:"64000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:47,name:"بنك صادرات ايران",code:"66000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:48,name:"بنك الشرق الأوسط المحدود",code:"69000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:49,name:"مصرف الرافدين",code:"73000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:50,name:"البنك السوداني المصري",code:"95380001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:51,name:"توماس كوك",code:"96000001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:52,name:"امريكان اكسبريس",code:"96010001FB",category:"بنك أجنبي",source:"أكواد الاستعلام 2025"},
+  {id:53,name:"شركة تنمية / شركة سنده",code:"00010001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:54,name:"جمعية تنمية المجتمع بسوهاج",code:"00020000MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:55,name:"جمعية سيدات أعمال اسكندرية",code:"00020001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:56,name:"الجمعية المصرية للتنمية والتمويل",code:"00020002MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:57,name:"جمعية رجال الأعمال والمستثمرين الدقهلية",code:"00020003MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:58,name:"كاش",code:"00020011MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:59,name:"كاش قديم قبل بلتون",code:"00020012MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:60,name:"وسيلة (اور كابيتال)",code:"00020013MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:61,name:"جمعية سيدات أعمال ومستثمرين اسيوط",code:"00020156MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:62,name:"الشركة المصرية الوطنية (لييد)",code:"00021006MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:63,name:"المؤسسة المصرية",code:"00021007MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:64,name:"مؤسسة أنا المصري",code:"00021021MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:65,name:"شباب مصر",code:"00021028MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:66,name:"جمعية رجال الأعمال والمستثمرين بالشرقية",code:"00021029MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:67,name:"شركة ريديك",code:"00021030MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:68,name:"جمعية رجال الأعمال والمستثمرين اسيوط",code:"00021032MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:69,name:"الجمعية المصرية للتنمية الشاملة",code:"00021040MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:70,name:"سان مارك",code:"00021054MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:71,name:"جمعية تحفيظ القرآن الكريم",code:"00021057MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:72,name:"جمعية حواء",code:"00021076MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:73,name:"باب رزق",code:"00021114MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:74,name:"شركة BEST",code:"MF00021119",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:75,name:"جمعية رجال الأعمال نجع حمادي",code:"00021132MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:76,name:"جمعية الصم والبكم لذوي الاحتياجات الخاصة",code:"00021143MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:77,name:"الأولى",code:"00021174MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:78,name:"جمعية المحبة",code:"00021181MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:79,name:"جمعية رابطة المرأة بأسيوط",code:"00021188MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:80,name:"مؤسسة تنمية الأسرة المصرية",code:"00021206MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:81,name:"جمعية تنمية المجتمع ببا",code:"00021219MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:82,name:"جمعية بشاير الخير",code:"00021231MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:83,name:"مبادرة",code:"00021245MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:84,name:"جمعية سيدات الأعمال اسيوط (كود جديد)",code:"00021256MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:85,name:"جمعية المرأة الريفية",code:"00021259MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:86,name:"الشؤون الاجتماعية",code:"00021264MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:87,name:"المؤسسة المصرية للتنمية (جمعية محروسة بسوهاج)",code:"00021306MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:88,name:"جمعية تنمية القدرات بقنا",code:"00021359MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:89,name:"جمعية كاريتاس",code:"00021373MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:90,name:"الجمعية الإقليمية للتنمية والمشروعات",code:"00021375MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:91,name:"جمعية الصعيد",code:"00021420MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:92,name:"جمعية التنمية والطفولة",code:"00021424MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:93,name:"عمال المحاجر",code:"00021553MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:94,name:"جمعية خالد فضل",code:"00021815MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:95,name:"ريفي",code:"00030001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:96,name:"تساهيل",code:"00040001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:97,name:"مؤسسة التضامن",code:"00050001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:98,name:"جمعية تنمية المشروعات الصغيرة ببورسعيد",code:"00060001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:99,name:"الهيئة القبطية الإنجيلية",code:"00070001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:100,name:"مؤسسة مصر الخير",code:"00090001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:101,name:"شركة سنده للتمويل متناهي الصغر",code:"00100001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:102,name:"شركة أمان",code:"00110001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:103,name:"تمويلي",code:"00120001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:104,name:"شركة فوري",code:"00130001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:105,name:"فيتاس مصر",code:"00140001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:106,name:"جمعية صغار الصناع",code:"00160001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:107,name:"الأهلي تمكين",code:"00180001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:108,name:"شركة بدايتي",code:"00190001MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:109,name:"كاش للمبالغ الجديدة",code:"00200000MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:110,name:"ارادة",code:"00121007MF",category:"تمويل متناهي الصغر",source:"أكواد الاستعلام 2025"},
+  {id:111,name:"الصندوق الاجتماعي للتنمية",code:"93000001NB",category:"هيئة ومؤسسة أخرى",source:"أكواد الاستعلام 2025"},
+  {id:112,name:"المصرف العربي الدولي",code:"95400001NB",category:"هيئة ومؤسسة أخرى",source:"أكواد الاستعلام 2025"},
+  {id:113,name:"بنك ناصر الاجتماعي",code:"95000001NB",category:"هيئة ومؤسسة أخرى",source:"أكواد الاستعلام 2025"},
+  {id:114,name:"جهاز تنمية المشروعات المتوسطة",code:"00010001NB",category:"هيئة ومؤسسة أخرى",source:"أكواد الاستعلام 2025"},
+  {id:115,name:"المصرف العربي الدولي",code:"94000001NB",category:"هيئة ومؤسسة أخرى",source:"أكواد الاستعلام 2025"},
+  {id:116,name:"شركة تشارتر للاستشارات المالية",code:"00030001FS",category:"خدمات مالية غير مصرفية",source:"أكواد الاستعلام 2025"},
+  {id:117,name:"شركة القاهرة التخصيم",code:"00040000FS",category:"خدمات مالية غير مصرفية",source:"أكواد الاستعلام 2025"},
+  {id:118,name:"فاليو لخدمات البيع بالتقسيط",code:"00050001FS",category:"خدمات مالية غير مصرفية",source:"أكواد الاستعلام 2025"},
+  {id:119,name:"شركة رأس المال المخاطر",code:"00060002FS",category:"خدمات مالية غير مصرفية",source:"أكواد الاستعلام 2025"},
+  {id:120,name:"بريمور انترناشيونال لخدمات الائتمان",code:"00010001CR",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:121,name:"مجموعة شركة هاباك",code:"00010001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:122,name:"الشركة العالمية المتحدة للتجارة",code:"00030001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:123,name:"الشركة الدولية للاستثمار والتجارة",code:"00040001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:124,name:"شركة يونيون جروب",code:"00050001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:125,name:"المجموعة المصرية للأنظمة الطبية",code:"00060001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:126,name:"شركة درايف",code:"00070001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:127,name:"شركة B-TECH",code:"RC00090001",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:128,name:"شركة راية",code:"00110001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:129,name:"رواج لتجارة السيارات",code:"00120001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:130,name:"شركة عفراء لتكنولوجيا الحاسبات",code:"00130001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:131,name:"شركة مصر الحجاز لمواد التعبئة",code:"00140001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:132,name:"الشركة المصرية لأنظمة التغليف",code:"00150001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:133,name:"بروسوفت لنظم المعلومات",code:"00160001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:134,name:"شركة سكاي ايجيبت للتوريد",code:"00190001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:135,name:"شركة غليونجي للتجارة",code:"00200001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:136,name:"شركة سكاي فايناس لتقسيط السيارات",code:"00210001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:137,name:"كونتاكت",code:"00230001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:138,name:"تقسيط شركة فاليو",code:"00290001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:139,name:"أمان أجهزة وسلع معمرة",code:"00320001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:140,name:"فاينانشال تكنولوجيز",code:"00350001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:141,name:"سهولة",code:"00400001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:142,name:"مشروعي",code:"00460001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:143,name:"شركة حالا للبيع بالتقسيط",code:"00580001RC",category:"ائتمان واستهلاك",source:"أكواد الاستعلام 2025"},
+  {id:144,name:"المصرية للتأمين التكافلي حياة",code:"00010001IC",category:"تأمين",source:"أكواد الاستعلام 2025"},
+  {id:145,name:"الشركة الوطنية للغاز",code:"00010001UC",category:"مرافق",source:"أكواد الاستعلام 2025"},
+  {id:146,name:"اورانج مصر للاتصالات",code:"00020001UC",category:"مرافق",source:"أكواد الاستعلام 2025"},
+  {id:147,name:"التعمير للتمويل العقاري الأولى",code:"98000001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:148,name:"المصرية للتمويل العقاري",code:"98010001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:149,name:"تمويل للتمويل العقاري",code:"98020001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:150,name:"تمويل الإمارات للتمويل العقاري",code:"98040001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:151,name:"التيسير للتمويل العقاري",code:"98050001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:152,name:"شركة بيت للتمويل العقاري",code:"98060001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:153,name:"سكن للتمويل العقاري",code:"98070001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:154,name:"الأهلي المتحد للتمويل العقاري",code:"98080001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:155,name:"الأهلي للتمويل العقاري",code:"98090001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:156,name:"شركة المصريين للتمويل العقاري",code:"98100001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:157,name:"شركة كونتاكت للتمويل العقاري",code:"98120001MG",category:"تمويل عقاري",source:"أكواد الاستعلام 2025"},
+  {id:158,name:"الشركة الدولية لتأجير التمويل",code:"98500001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:159,name:"شركة توشكى للتأجير العقاري",code:"98510001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:160,name:"شركة كوربلبيس للتأجير التمويلي",code:"98520001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:161,name:"شركة اوريكس مصر للتأجير التمويلي",code:"98530001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:162,name:"شركة التوفيق للتأجير التمويلي",code:"98540001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:163,name:"شركة أملاك للتمويل مصر",code:"98550001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:164,name:"شركة تكنوليس للتمويل التأجيري",code:"98560001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:165,name:"شركة بيربوس للتأجير التمويلي",code:"98570001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:166,name:"شركة المصريين للإنماء الاقتصادي",code:"98580001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:167,name:"شركة جي بي للتمويل التأجيري",code:"98590001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:168,name:"شركة بي ان بي باربيا للتأجير التمويلي",code:"98600001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:169,name:"شركة سوجيليس ايجيبت للتأجير التمويلي",code:"98610001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:170,name:"شركة اديليس للتأجير التمويلي",code:"98620001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:171,name:"شركة تمويل للتأجير التمويلي",code:"98630001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:172,name:"شركة جراند انفستمنت للتأجير التمويلي",code:"98640001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:173,name:"شركة ايماك للتأجير التمويلي",code:"98650001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:174,name:"شركة بيت الخبرة للتنمية الاقتصادية",code:"98660001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:175,name:"شركة الأهلي للتأجير التمويلي",code:"98670001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:176,name:"شركة بلس للتأجير التمويلي",code:"98680001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:177,name:"المجموعة المالية هيرميس للتأجير",code:"98700001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:178,name:"شركة العربي الأفريقي الدولي للتأجير",code:"98710001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:179,name:"جلوبال ليس للتأجير التمويلي",code:"98720001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:180,name:"التعمير للتأجير التمويلي الأولى",code:"98740001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:181,name:"شركة إنماء للتأجير التمويلي",code:"98750001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:182,name:"يونايتد للتأجير التمويلي",code:"98760001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:183,name:"شركة بي ام للتأجير التمويلي",code:"98770001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:184,name:"شركة تنمية للتأجير التمويلي",code:"98780001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:185,name:"شركة كايرو للتأجير التمويلي",code:"98800001LF",category:"تأجير تمويلي",source:"أكواد الاستعلام 2025"},
+  {id:186,name:"شركة مدينة نصر للإسكان والتعمير",code:"00010001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:187,name:"مجموعة عامر",code:"00020001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:188,name:"شركة اوراسكوم للإسكان والتعمير",code:"00040001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:189,name:"شركة بالم هيلز للتعمير",code:"00050001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:190,name:"شركة ايه اي سي فايناس التجارية",code:"00060001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:191,name:"مجموعة مطاوع جروب للاستثمار",code:"00070001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+  {id:192,name:"الشركة الدولية للتنمية العقارية",code:"00080001HS",category:"إسكان وتعمير",source:"أكواد الاستعلام 2025"},
+];
+
+const CAT_META = {
+  "بنك عام":               {ic:"🏛️",ac:"#1d6fdb"},
+  "بنك متخصص":            {ic:"🏦",ac:"#7c3aed"},
+  "بنك تجاري":             {ic:"🏦",ac:"#0891b2"},
+  "بنك استثماري":          {ic:"💼",ac:"#059669"},
+  "بنك أجنبي":             {ic:"🌐",ac:"#d97706"},
+  "تمويل متناهي الصغر":   {ic:"🌱",ac:"#059669"},
+  "هيئة ومؤسسة أخرى":     {ic:"🏢",ac:"#64748b"},
+  "خدمات مالية غير مصرفية":{ic:"📊",ac:"#7c3aed"},
+  "ائتمان واستهلاك":       {ic:"🛒",ac:"#dc2626"},
+  "تأمين":                 {ic:"🛡️",ac:"#0891b2"},
+  "مرافق":                 {ic:"⚡",ac:"#d97706"},
+  "تمويل عقاري":           {ic:"🏠",ac:"#d97706"},
+  "تأجير تمويلي":          {ic:"📋",ac:"#64748b"},
+  "إسكان وتعمير":          {ic:"🏗️",ac:"#059669"},
+  "مستورد من PDF":         {ic:"📄",ac:"#7c3aed"},
+};
+
+// ══ STATE ══
+let DATA = [...BASE_DATA];
+let activeFilter = 'all';
+let currentResults = [];
+let recentSearches = [];
+let fuseInst = null;
+let acTimer = null;
+let nextId = 300;
+
+// load recent from localStorage
+try { recentSearches = JSON.parse(localStorage.getItem('crRecentV2')||'[]'); } catch(e){}
+
+// ══ ARABIC NORMALIZE ══
+function norm(s){
+  if(!s) return '';
+  return s
+    .toLowerCase()
+    .replace(/[\u064B-\u065F\u0670]/g,'')
+    .replace(/[أإآاٱ]/g,'ا')
+    .replace(/ة/g,'ه')
+    .replace(/ى/g,'ي')
+    .replace(/ؤ/g,'و')
+    .replace(/ئ/g,'ي')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+// ══ FUSE INIT ══
+function buildFuse(){
+  const pool = DATA.map(d=>({...d,_n:norm(d.name),_c:d.code.toLowerCase(),_cat:norm(d.category)}));
+  fuseInst = new Fuse(pool,{
+    keys:[{name:'_n',weight:.5},{name:'_c',weight:.3},{name:'_cat',weight:.1},{name:'name',weight:.1}],
+    threshold:0.45,includeScore:true,minMatchCharLength:1,
+  });
+  document.getElementById('hTotal').textContent = DATA.length;
+  document.getElementById('resTot').textContent = DATA.length;
+}
+
+// ══ SEARCH ══
+function doSearch(raw){
+  raw = (raw||'').trim();
+  if(!raw){ showWelcome(); return; }
+
+  saveRecent(raw);
+  const q = norm(raw);
+  const ql = raw.toLowerCase();
+
+  // pool by filter
+  let pool = activeFilter==='all' ? DATA : DATA.filter(d=>d.category===activeFilter);
+
+  // exact / partial first
+  let res = pool.filter(d=>
+    norm(d.name).includes(q) ||
+    d.code.toLowerCase().includes(ql) ||
+    norm(d.category).includes(q)
+  );
+
+  // fuzzy fallback
+  if(!res.length && fuseInst){
+    const fp = new Fuse(
+      pool.map(d=>({...d,_n:norm(d.name),_c:d.code.toLowerCase(),_cat:norm(d.category)})),
+      {keys:['_n','_c','_cat'],threshold:0.5,includeScore:true}
+    );
+    res = fp.search(q).map(r=>r.item);
   }
 
-  // ====================================================
-  // INIT FUSE.JS
-  // ====================================================
-  function initFuse() {
-    // Create normalized copies for searching
-    const searchData = allData.map(item => ({
-      ...item,
-      _normName: normalizeArabic(item.name),
-      _normCode: item.code.toLowerCase(),
-      _normCat: normalizeArabic(item.category),
-    }));
+  sortAndRender(res, raw);
+}
 
-    fuseInstance = new Fuse(searchData, {
-      keys: [
-        { name: '_normName', weight: 0.5 },
-        { name: 'name', weight: 0.3 },
-        { name: '_normCode', weight: 0.15 },
-        { name: 'code', weight: 0.15 },
-        { name: '_normCat', weight: 0.05 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-      includeMatches: true,
-      minMatchCharLength: 1,
-      useExtendedSearch: false,
-      getFn: (obj, path) => {
-        const val = Fuse.config.getFn(obj, path);
-        if (typeof val === 'string') return normalizeArabic(val);
-        return val;
-      }
-    });
+function sortAndRender(res, q){
+  const s = document.getElementById('sortSel').value;
+  let r = [...res];
+  if(s==='name') r.sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  else if(s==='code') r.sort((a,b)=>a.code.localeCompare(b.code));
+  else if(s==='cat') r.sort((a,b)=>a.category.localeCompare(b.category,'ar'));
+  currentResults = r;
+  renderCards(r, q);
+}
 
-    document.getElementById('totalCount').textContent = allData.length;
-    document.getElementById('totalNum').textContent = allData.length;
+// ══ RENDER ══
+function renderCards(res, q){
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+  const wel   = document.getElementById('welcomeState');
+  const head  = document.getElementById('resHead');
+
+  wel.style.display='none';
+  grid.innerHTML='';
+
+  if(!res.length){
+    empty.classList.add('show');
+    head.classList.remove('show');
+    return;
   }
+  empty.classList.remove('show');
+  head.classList.add('show');
+  document.getElementById('resNum').textContent = res.length;
+  document.getElementById('resTot').textContent = DATA.length;
 
-  // ====================================================
-  // SEARCH
-  // ====================================================
-  function performSearch(query) {
-    const rawQuery = query.trim();
-
-    if (!rawQuery) {
-      showWelcome();
-      return;
-    }
-
-    const normQuery = normalizeArabic(rawQuery);
-
-    // Save to recent
-    saveRecent(rawQuery);
-
-    // Filter by category first
-    let pool = activeFilter === 'all' ? allData : allData.filter(d => d.category === activeFilter);
-
-    let results;
-
-    // Exact / partial match first (faster & more accurate)
-    const exactMatches = pool.filter(item => {
-      const nm = normalizeArabic(item.name);
-      const code = item.code.toLowerCase();
-      const cat = normalizeArabic(item.category);
-      const nq = normQuery;
-      return nm.includes(nq) || code.includes(rawQuery.toLowerCase()) || cat.includes(nq);
-    });
-
-    if (exactMatches.length > 0) {
-      results = exactMatches;
-    } else {
-      // Fuzzy fallback
-      const fusePool = new Fuse(pool.map(item => ({
-        ...item,
-        _normName: normalizeArabic(item.name),
-        _normCode: item.code.toLowerCase(),
-        _normCat: normalizeArabic(item.category),
-      })), {
-        keys: ['_normName', '_normCode', '_normCat'],
-        threshold: 0.5,
-        includeScore: true,
-      });
-      results = fusePool.search(normQuery).map(r => r.item);
-    }
-
-    // Sort
-    applySort(results, rawQuery);
-  }
-
-  function applySort(results, query) {
-    const sort = document.getElementById('sortSelect').value;
-    let sorted = [...results];
-
-    if (sort === 'name') sorted.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-    else if (sort === 'code') sorted.sort((a, b) => a.code.localeCompare(b.code));
-    else if (sort === 'category') sorted.sort((a, b) => a.category.localeCompare(b.category, 'ar'));
-
-    currentResults = sorted;
-    renderResults(sorted, query);
-  }
-
-  // ====================================================
-  // RENDER
-  // ====================================================
-  function renderResults(results, query) {
-    const grid = document.getElementById('cardsGrid');
-    const empty = document.getElementById('emptyState');
-    const welcome = document.getElementById('welcomeState');
-    const header = document.getElementById('resultsHeader');
-
-    welcome.style.display = 'none';
-    grid.innerHTML = '';
-
-    if (results.length === 0) {
-      empty.classList.add('visible');
-      header.style.display = 'none';
-      return;
-    }
-
-    empty.classList.remove('visible');
-    header.style.display = 'flex';
-    document.getElementById('resultsNum').textContent = results.length;
-
-    results.forEach((item, i) => {
-      const card = createCard(item, query, i);
-      grid.appendChild(card);
-    });
-  }
-
-  function highlightText(text, query) {
-    if (!query) return escapeHtml(text);
-    const norm = normalizeArabic(query);
-    const normText = normalizeArabic(text);
-    const idx = normText.indexOf(norm);
-    if (idx === -1) return escapeHtml(text);
-    const before = text.slice(0, idx);
-    const match = text.slice(idx, idx + norm.length);
-    const after = text.slice(idx + norm.length);
-    return `${escapeHtml(before)}<mark>${escapeHtml(match)}</mark>${escapeHtml(after)}`;
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function createCard(item, query, index) {
-    const colors = CATEGORY_COLORS[item.category] || { bg: '#111927', accent: '#3b82f6', icon: '🏢' };
+  res.forEach((item,i)=>{
+    const m = CAT_META[item.category]||{ic:'🏢',ac:'#1d6fdb'};
     const card = document.createElement('div');
-    card.className = 'result-card';
-    card.style.setProperty('--card-accent', colors.accent);
-    card.style.animationDelay = `${Math.min(index * 40, 400)}ms`;
-
-    const catColor = colors.accent;
-    const catBg = `${colors.accent}20`;
-
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-icon">${colors.icon}</div>
-        <div class="card-meta">
-          <div class="card-name">${highlightText(item.name, query)}</div>
-          <div class="card-category" style="color:${catColor}; background:${catBg}; border-color:${catColor}40">
-            ${item.category}
-          </div>
+    card.className='card';
+    card.style.cssText=`--card-ac:${m.ac};animation-delay:${Math.min(i*30,300)}ms`;
+    const tagBg = m.ac+'20';
+    card.innerHTML=`
+      <div class="card-top">
+        <div class="card-ico">${m.ic}</div>
+        <div class="card-info">
+          <div class="card-name">${hl(item.name,q)}</div>
+          <div class="card-tag" style="color:${m.ac};background:${tagBg};border-color:${m.ac}40">${item.category}</div>
         </div>
       </div>
-      <div class="card-code-block">
-        <span class="code-label">كود الاستعلام</span>
-        <span class="code-value">${highlightCode(item.code, query)}</span>
+      <div class="code-block">
+        <span class="code-lbl">كود الاستعلام</span>
+        <span class="code-val">${hlCode(item.code,q)}</span>
       </div>
-      <div class="card-source">📄 ${escapeHtml(item.source)}</div>
-      <div class="card-actions">
-        <button class="btn-copy" onclick="copyCode('${item.code}', this)">
-          📋 نسخ الكود
-        </button>
-        <button class="btn-copy" onclick="copyFull('${item.id}', this)">
-          📝 نسخ البيانات
-        </button>
-      </div>
-    `;
-    return card;
-  }
+      <div class="card-src">📄 ${esc(item.source)}</div>
+      <div class="card-btns">
+        <button class="btn-c" onclick="cpCode('${esc(item.code)}',this)">📋 نسخ الكود</button>
+        <button class="btn-c" onclick="cpFull(${item.id},this)">📝 نسخ البيانات</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
 
-  function highlightCode(code, query) {
-    if (!query) return escapeHtml(code);
-    const lower = code.toLowerCase();
-    const q = query.toLowerCase();
-    const idx = lower.indexOf(q);
-    if (idx === -1) return escapeHtml(code);
-    return escapeHtml(code.slice(0, idx)) + `<mark>${escapeHtml(code.slice(idx, idx + q.length))}</mark>` + escapeHtml(code.slice(idx + q.length));
-  }
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function hl(txt,q){
+  if(!q) return esc(txt);
+  const nq=norm(q), nt=norm(txt);
+  const i=nt.indexOf(nq); if(i<0) return esc(txt);
+  return esc(txt.slice(0,i))+'<mark>'+esc(txt.slice(i,i+nq.length))+'</mark>'+esc(txt.slice(i+nq.length));
+}
+function hlCode(code,q){
+  if(!q) return esc(code);
+  const i=code.toLowerCase().indexOf(q.toLowerCase()); if(i<0) return esc(code);
+  return esc(code.slice(0,i))+'<mark>'+esc(code.slice(i,i+q.length))+'</mark>'+esc(code.slice(i+q.length));
+}
 
-  // ====================================================
-  // WELCOME STATE
-  // ====================================================
-  function showWelcome() {
-    document.getElementById('cardsGrid').innerHTML = '';
-    document.getElementById('emptyState').classList.remove('visible');
-    document.getElementById('resultsHeader').style.display = 'none';
-    document.getElementById('welcomeState').style.display = 'block';
-    buildWelcomeGrid();
-  }
+// ══ WELCOME ══
+function showWelcome(){
+  document.getElementById('cardsGrid').innerHTML='';
+  document.getElementById('emptyState').classList.remove('show');
+  document.getElementById('resHead').classList.remove('show');
+  const wel = document.getElementById('welcomeState');
+  wel.style.display='block';
+  const g = document.getElementById('welcomeGrid');
+  g.innerHTML='';
+  const cats={};
+  DATA.forEach(d=>{ cats[d.category]=(cats[d.category]||0)+1; });
+  Object.entries(cats).forEach(([c,cnt])=>{
+    const m=CAT_META[c]||{ic:'🏢',ac:'#1d6fdb'};
+    const div=document.createElement('div');
+    div.className='w-card';
+    div.style.borderColor=m.ac+'40';
+    div.innerHTML=`<div class="w-ic">${m.ic}</div><div class="w-name">${c}</div><div class="w-cnt">${cnt} مؤسسة</div>`;
+    div.onclick=()=>{ setFilter(c); showFilterResults(c); };
+    g.appendChild(div);
+  });
+}
 
-  function buildWelcomeGrid() {
-    const grid = document.getElementById('welcomeGrid');
-    grid.innerHTML = '';
-    const cats = {};
-    allData.forEach(item => {
-      if (!cats[item.category]) cats[item.category] = 0;
-      cats[item.category]++;
-    });
-    Object.entries(cats).forEach(([cat, count]) => {
-      const colors = CATEGORY_COLORS[cat] || { icon: '🏢', accent: '#3b82f6' };
-      const div = document.createElement('div');
-      div.className = 'welcome-card';
-      div.style.borderColor = `${colors.accent}40`;
-      div.innerHTML = `
-        <div class="welcome-card-icon">${colors.icon}</div>
-        <div class="welcome-card-name">${cat}</div>
-        <div class="welcome-card-count">${count} مؤسسة</div>
-      `;
-      div.onclick = () => {
-        setFilter(cat);
-        document.getElementById('searchInput').value = '';
-        performSearch('');
-        setTimeout(() => {
-          const pool = allData.filter(d => d.category === cat);
-          currentResults = pool;
-          renderResults(pool, '');
-          document.getElementById('resultsNum').textContent = pool.length;
-          document.getElementById('resultsHeader').style.display = 'flex';
-        }, 0);
-      };
-      grid.appendChild(div);
-    });
-  }
+function showFilterResults(cat){
+  const pool = DATA.filter(d=>d.category===cat);
+  currentResults=pool;
+  renderCards(pool,'');
+  document.getElementById('welcomeState').style.display='none';
+}
 
-  // ====================================================
-  // FILTER
-  // ====================================================
-  function setFilter(filter) {
-    activeFilter = filter;
-    document.querySelectorAll('.chip').forEach(c => {
-      c.classList.toggle('active', c.dataset.filter === filter);
-    });
-  }
+// ══ FILTER ══
+function setFilter(f){
+  activeFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
+}
 
-  document.getElementById('filterChips').addEventListener('click', e => {
-    const chip = e.target.closest('.chip');
-    if (!chip) return;
-    setFilter(chip.dataset.filter);
-    const q = document.getElementById('searchInput').value;
-    if (q.trim()) performSearch(q);
-    else {
-      const pool = activeFilter === 'all' ? allData : allData.filter(d => d.category === activeFilter);
-      currentResults = pool;
-      if (pool.length < allData.length) {
-        renderResults(pool, '');
-        document.getElementById('resultsHeader').style.display = 'flex';
-        document.getElementById('resultsNum').textContent = pool.length;
-        document.getElementById('welcomeState').style.display = 'none';
-      } else {
-        showWelcome();
+// ══ AUTOCOMPLETE ══
+function showAC(q){
+  const drop=document.getElementById('acDrop');
+  if(!q||q.length<1){drop.classList.remove('open');return;}
+  const nq=norm(q);
+  const hits=DATA.filter(d=>norm(d.name).includes(nq)||d.code.toLowerCase().includes(q.toLowerCase())).slice(0,6);
+  if(!hits.length){drop.classList.remove('open');return;}
+  drop.innerHTML=hits.map(d=>`
+    <div class="ac-item" onclick="pickAC(${d.id})">
+      <span class="ac-name">${esc(d.name)}</span>
+      <span class="ac-code">${esc(d.code)}</span>
+      <span class="ac-cat">${esc(d.category)}</span>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+
+function pickAC(id){
+  const d=DATA.find(x=>x.id===id); if(!d) return;
+  document.getElementById('searchInput').value=d.name;
+  document.getElementById('acDrop').classList.remove('open');
+  updateClear();
+  doSearch(d.name);
+}
+
+// ══ RECENT ══
+function saveRecent(q){
+  if(!q) return;
+  recentSearches=[q,...recentSearches.filter(s=>s!==q)].slice(0,8);
+  try{localStorage.setItem('crRecentV2',JSON.stringify(recentSearches));}catch(e){}
+  renderRecent();
+}
+function renderRecent(){
+  const a=document.getElementById('recentArea');
+  const c=document.getElementById('recentChips');
+  if(!recentSearches.length){a.classList.remove('show');return;}
+  a.classList.add('show');
+  c.innerHTML=recentSearches.map(s=>`<button class="r-chip" onclick="pickRecent('${esc(s)}')">🕐 ${esc(s)}</button>`).join('');
+}
+function pickRecent(q){
+  document.getElementById('searchInput').value=q;
+  updateClear();
+  doSearch(q);
+}
+
+// ══ COPY ══
+function cpCode(code,btn){
+  navigator.clipboard.writeText(code).then(()=>{
+    btn.classList.add('done');btn.textContent='✓ تم النسخ';
+    toast('تم نسخ الكود: '+code);
+    setTimeout(()=>{btn.classList.remove('done');btn.innerHTML='📋 نسخ الكود';},2000);
+  });
+}
+function cpFull(id,btn){
+  const d=DATA.find(x=>x.id===id); if(!d) return;
+  const t=`الاسم: ${d.name}\nالكود: ${d.code}\nالتصنيف: ${d.category}\nالمصدر: ${d.source}`;
+  navigator.clipboard.writeText(t).then(()=>{
+    btn.classList.add('done');btn.textContent='✓ تم النسخ';
+    toast('تم نسخ البيانات الكاملة');
+    setTimeout(()=>{btn.classList.remove('done');btn.innerHTML='📝 نسخ البيانات';},2000);
+  });
+}
+
+// ══ TOAST ══
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+
+// ══ EXPORT CSV ══
+document.getElementById('btnExp').onclick=()=>{
+  if(!currentResults.length) return;
+  const BOM='\uFEFF';
+  const rows=currentResults.map(r=>`"${r.name}","${r.code}","${r.category}","${r.source}"`);
+  const csv=BOM+'الاسم,الكود,التصنيف,المصدر\n'+rows.join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='اكواد_الاستعلام_الائتماني.csv';
+  a.click();
+  toast('تم تصدير '+currentResults.length+' نتيجة');
+};
+
+// ══ PDF UPLOAD & PARSE ══
+const CODE_REGEX = /\b([A-Z]{2}\d{8}|\d{8}[A-Z]{2})\b/g;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+async function parsePDF(file){
+  const status=document.getElementById('uploadStatus');
+  status.className='upload-status loading';
+  status.textContent='⏳ جاري قراءة الملف وتحليل المحتوى...';
+
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let fullText='';
+
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const tc=await page.getTextContent();
+      fullText+=tc.items.map(i=>i.str).join(' ')+'\n';
+    }
+
+    // Extract lines, then try to find code + name pairs
+    const lines = fullText.split(/[\n\r]+/).map(l=>l.trim()).filter(Boolean);
+    const added=[];
+    const existingCodes=new Set(DATA.map(d=>d.code.toUpperCase()));
+
+    // Strategy: look for CODE + Arabic name pattern on same or adjacent lines
+    const codeLineRe = /([A-Z]{2}\d{8}|\d{8}[A-Z]{2}|\d{6,10}[A-Z]{2}|[A-Z]{2}\d{6,10})/g;
+
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i];
+      const codeMatches=[...line.matchAll(codeLineRe)];
+
+      for(const m of codeMatches){
+        const code=m[0].toUpperCase();
+        if(existingCodes.has(code)) continue;
+
+        // Find a name: could be on same line (before/after code) or adjacent line
+        let name='';
+        const withoutCode=line.replace(code,'').trim();
+        const arabicPart=withoutCode.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
+        if(arabicPart) name=arabicPart.join(' ').trim();
+
+        // If no Arabic on this line, check adjacent
+        if(!name || name.length<3){
+          const prev=i>0?lines[i-1]:'';
+          const next=i<lines.length-1?lines[i+1]:'';
+          const arPrev=prev.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
+          const arNext=next.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
+          if(arPrev && arPrev.join('').trim().length>3) name=arPrev.join(' ').trim();
+          else if(arNext && arNext.join('').trim().length>3) name=arNext.join(' ').trim();
+        }
+
+        if(!name || name.trim().length<2) name='مؤسسة من '+file.name;
+
+        // Determine category from code suffix
+        const suf=code.slice(-2);
+        const catMap={MF:'تمويل متناهي الصغر',CB:'بنك تجاري',IB:'بنك استثماري',
+          FB:'بنك أجنبي',SB:'بنك متخصص',PC:'بنك عام',RA:'بنك عام',
+          NB:'هيئة ومؤسسة أخرى',FS:'خدمات مالية غير مصرفية',
+          RC:'ائتمان واستهلاك',CR:'ائتمان واستهلاك',IC:'تأمين',
+          UC:'مرافق',MG:'تمويل عقاري',LF:'تأجير تمويلي',HS:'إسكان وتعمير'};
+        const category=catMap[suf]||'مستورد من PDF';
+
+        DATA.push({
+          id:nextId++,
+          name:name.replace(/\s+/g,' ').trim(),
+          code:code,
+          category:category,
+          source:file.name.replace('.pdf','')
+        });
+        existingCodes.add(code);
+        added.push(code);
       }
     }
-  });
 
-  // ====================================================
-  // AUTOCOMPLETE
-  // ====================================================
-  function showAutocomplete(query) {
-    const dropdown = document.getElementById('autocompleteDropdown');
-    if (!query || query.length < 1) { dropdown.classList.remove('open'); return; }
+    buildFuse();
 
-    const norm = normalizeArabic(query);
-    const matches = allData.filter(item =>
-      normalizeArabic(item.name).includes(norm) ||
-      item.code.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 6);
-
-    if (!matches.length) { dropdown.classList.remove('open'); return; }
-
-    dropdown.innerHTML = matches.map(item => `
-      <div class="autocomplete-item" data-id="${item.id}" onclick="selectAutocomplete(${item.id})">
-        <div class="autocomplete-name">${escapeHtml(item.name)}</div>
-        <div class="autocomplete-code">${escapeHtml(item.code)}</div>
-        <div class="autocomplete-cat">${escapeHtml(item.category)}</div>
-      </div>
-    `).join('');
-
-    dropdown.classList.add('open');
-  }
-
-  function selectAutocomplete(id) {
-    const item = allData.find(d => d.id === id);
-    if (!item) return;
-    document.getElementById('searchInput').value = item.name;
-    document.getElementById('autocompleteDropdown').classList.remove('open');
-    performSearch(item.name);
-  }
-
-  // ====================================================
-  // RECENT SEARCHES
-  // ====================================================
-  function saveRecent(query) {
-    if (!query) return;
-    recentSearches = [query, ...recentSearches.filter(s => s !== query)].slice(0, 8);
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-    renderRecent();
-  }
-
-  function renderRecent() {
-    const section = document.getElementById('recentSection');
-    const chips = document.getElementById('recentChips');
-    if (!recentSearches.length) { section.classList.remove('visible'); return; }
-    section.classList.add('visible');
-    chips.innerHTML = recentSearches.map(s => `
-      <button class="recent-chip" onclick="searchFromRecent('${escapeHtml(s)}')">
-        🕐 ${escapeHtml(s)}
-      </button>
-    `).join('');
-  }
-
-  function searchFromRecent(q) {
-    document.getElementById('searchInput').value = q;
-    performSearch(q);
-    updateClearBtn();
-  }
-
-  document.getElementById('btnClearRecent').onclick = () => {
-    recentSearches = [];
-    localStorage.removeItem('recentSearches');
-    renderRecent();
-  };
-
-  // ====================================================
-  // COPY ACTIONS
-  // ====================================================
-  function copyCode(code, btn) {
-    navigator.clipboard.writeText(code).then(() => {
-      btn.classList.add('copied');
-      btn.textContent = '✓ تم النسخ';
-      showToast(`تم نسخ الكود: ${code}`);
-      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '📋 نسخ الكود'; }, 2000);
-    });
-  }
-
-  function copyFull(id, btn) {
-    const item = allData.find(d => d.id === id);
-    if (!item) return;
-    const text = `الاسم: ${item.name}\nالكود: ${item.code}\nالتصنيف: ${item.category}\nالمصدر: ${item.source}`;
-    navigator.clipboard.writeText(text).then(() => {
-      btn.classList.add('copied');
-      btn.textContent = '✓ تم النسخ';
-      showToast('تم نسخ البيانات الكاملة');
-      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '📝 نسخ البيانات'; }, 2000);
-    });
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // ====================================================
-  // EXPORT CSV
-  // ====================================================
-  document.getElementById('btnExport').onclick = () => {
-    if (!currentResults.length) return;
-    const BOM = '\uFEFF';
-    const header = 'الاسم,الكود,التصنيف,المصدر';
-    const rows = currentResults.map(r =>
-      `"${r.name}","${r.code}","${r.category}","${r.source}"`
-    );
-    const csv = BOM + [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'اكواد_الاستعلام_الائتماني.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast(`تم تصدير ${currentResults.length} نتيجة`);
-  };
-
-  // ====================================================
-  // SORT
-  // ====================================================
-  document.getElementById('sortSelect').onchange = () => {
-    const q = document.getElementById('searchInput').value;
-    if (currentResults.length) applySort(currentResults, q);
-  };
-
-  // ====================================================
-  // EVENT LISTENERS
-  // ====================================================
-  const input = document.getElementById('searchInput');
-
-  function updateClearBtn() {
-    const btn = document.getElementById('btnClear');
-    if (input.value.trim()) btn.classList.add('visible');
-    else btn.classList.remove('visible');
-  }
-
-  input.addEventListener('input', () => {
-    updateClearBtn();
-    clearTimeout(autocompleteTimeout);
-    autocompleteTimeout = setTimeout(() => {
-      showAutocomplete(input.value);
-      if (input.value.trim().length >= 1) performSearch(input.value);
-      else showWelcome();
-    }, 120);
-  });
-
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      document.getElementById('autocompleteDropdown').classList.remove('open');
-      performSearch(input.value);
+    if(added.length>0){
+      status.className='upload-status ok';
+      status.textContent=`✅ تم استخراج ${added.length} كود جديد وإضافتهم للبحث — من ملف: ${file.name}`;
+      toast('تم إضافة '+added.length+' كود جديد');
+      showWelcome();
+    } else {
+      status.className='upload-status err';
+      status.textContent=`⚠️ لم يتم العثور على أكواد جديدة في الملف. تأكد أن الأكواد بصيغة مثل 00020011MF`;
     }
-    if (e.key === 'Escape') {
-      document.getElementById('autocompleteDropdown').classList.remove('open');
-    }
-  });
+  } catch(err){
+    status.className='upload-status err';
+    status.textContent='❌ خطأ في قراءة الملف: '+err.message;
+    console.error(err);
+  }
+}
 
-  document.getElementById('btnSearch').onclick = () => {
-    document.getElementById('autocompleteDropdown').classList.remove('open');
-    performSearch(input.value);
-  };
+// File input handler
+document.getElementById('fileInput').onchange=e=>{
+  const f=e.target.files[0];
+  if(f) parsePDF(f);
+  e.target.value='';
+};
 
-  document.getElementById('btnClear').onclick = () => {
-    input.value = '';
-    updateClearBtn();
-    document.getElementById('autocompleteDropdown').classList.remove('open');
-    showWelcome();
-    input.focus();
-  };
+// Drag & drop
+const uc=document.getElementById('uploadCard');
+uc.addEventListener('dragover',e=>{e.preventDefault();uc.classList.add('drag')});
+uc.addEventListener('dragleave',()=>uc.classList.remove('drag'));
+uc.addEventListener('drop',e=>{
+  e.preventDefault();uc.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type==='application/pdf') parsePDF(f);
+  else toast('الرجاء رفع ملف PDF فقط');
+});
 
-  // Close autocomplete on outside click
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrapper')) {
-      document.getElementById('autocompleteDropdown').classList.remove('open');
-    }
-  });
+// ══ SORT ══
+document.getElementById('sortSel').onchange=()=>{
+  const q=document.getElementById('searchInput').value;
+  if(currentResults.length) sortAndRender(currentResults,q);
+};
 
-  // ====================================================
-  // INIT
-  // ====================================================
-  window.addEventListener('DOMContentLoaded', () => {
-    initFuse();
-    renderRecent();
-    showWelcome();
-  });
-  </script>
+// ══ FILTER CHIPS ══
+document.getElementById('filterChips').onclick=e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  setFilter(c.dataset.f);
+  const q=document.getElementById('searchInput').value;
+  if(q.trim()) doSearch(q);
+  else if(activeFilter!=='all'){
+    showFilterResults(activeFilter);
+    document.getElementById('welcomeState').style.display='none';
+  } else showWelcome();
+};
+
+// ══ INPUT EVENTS ══
+const inp=document.getElementById('searchInput');
+
+function updateClear(){
+  document.getElementById('btnClear').classList.toggle('show',inp.value.trim().length>0);
+}
+
+inp.addEventListener('input',()=>{
+  updateClear();
+  clearTimeout(acTimer);
+  acTimer=setTimeout(()=>{
+    showAC(inp.value);
+    if(inp.value.trim().length>=1) doSearch(inp.value);
+    else { document.getElementById('acDrop').classList.remove('open'); showWelcome(); }
+  },100);
+});
+
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ document.getElementById('acDrop').classList.remove('open'); doSearch(inp.value); }
+  if(e.key==='Escape') document.getElementById('acDrop').classList.remove('open');
+});
+
+document.getElementById('btnSearch').onclick=()=>{
+  document.getElementById('acDrop').classList.remove('open');
+  doSearch(inp.value);
+};
+
+document.getElementById('btnClear').onclick=()=>{
+  inp.value='';updateClear();
+  document.getElementById('acDrop').classList.remove('open');
+  showWelcome();inp.focus();
+};
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-wrap'))
+    document.getElementById('acDrop').classList.remove('open');
+});
+
+// ══ RECENT CLEAR ══
+document.getElementById('btnClrR').onclick=()=>{
+  recentSearches=[];
+  try{localStorage.removeItem('crRecentV2');}catch(e){}
+  renderRecent();
+};
+
+// ══ INIT ══
+buildFuse();
+renderRecent();
+showWelcome();
+</script>
 </body>
 </html>
