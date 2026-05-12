@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-<!-- PDF.js for PDF parsing -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <!-- Fuse.js for fuzzy search -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
 <style>
@@ -112,34 +110,6 @@ h1 em{font-style:normal;color:#a8d8ff}
   cursor:pointer;transition:var(--trans);font-family:var(--font)}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
 .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
-
-/* ── PDF UPLOAD ── */
-.upload-section{
-  max-width:900px;margin:0 auto 0;padding:0 20px 20px;
-}
-.upload-card{
-  background:var(--surface);border:2px dashed var(--border2);border-radius:var(--r2);
-  padding:20px;transition:var(--trans);cursor:pointer;
-}
-.upload-card:hover,.upload-card.drag{border-color:var(--blue);background:var(--blue-light)}
-.upload-inner{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.upload-icon{font-size:36px;flex-shrink:0}
-.upload-text h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
-.upload-text p{font-size:12px;color:var(--text3)}
-.btn-upload{
-  margin-right:auto;background:var(--blue);color:#fff;border:none;border-radius:8px;
-  padding:9px 18px;font-family:var(--font);font-size:13px;font-weight:700;
-  cursor:pointer;transition:var(--trans);white-space:nowrap;
-}
-.btn-upload:hover{background:#1557b8}
-#fileInput{display:none}
-.upload-status{
-  margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;
-  font-weight:600;display:none;
-}
-.upload-status.ok{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0;display:block}
-.upload-status.err{background:#fef2f2;color:var(--red);border:1px solid #fecaca;display:block}
-.upload-status.loading{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);display:block}
 
 /* ── RESULTS HEADER ── */
 .res-head{
@@ -289,6 +259,21 @@ footer strong{color:var(--text2)}
     <button class="chip" data-f="إسكان وتعمير">إسكان</button>
     <button class="chip" data-f="مستورد من PDF">➕ مضاف من PDF</button>
   </div>
+</div>
+<!-- RESULTS HEADER -->
+<div class="res-head" id="resHead">
+  <div class="res-count">نتيجة <span class="num" id="resNum">0</span> من أصل <span class="num" id="resTot">192</span></div>
+  <div class="res-actions">
+    <select class="sort-sel" id="sortSel">
+      <option value="rel">ترتيب: الصلة</option>
+      <option value="name">الاسم أ-ي</option>
+      <option value="code">الكود</option>
+      <option value="cat">التصنيف</option>
+    </select>
+    <button class="btn-exp" id="btnExp">📥 تصدير CSV</button>
+  </div>
+</div>
+
 <!-- CARDS GRID -->
 <div class="cards-grid" id="cardsGrid"></div>
 
