@@ -290,36 +290,6 @@ footer strong{color:var(--text2)}
     <button class="chip" data-f="مستورد من PDF">➕ مضاف من PDF</button>
   </div>
 </div>
-
-<!-- PDF UPLOAD -->
-<div class="upload-section">
-  <div class="upload-card" id="uploadCard">
-    <div class="upload-inner">
-      <div class="upload-text">
-        <h3>إضافة أكواد من ملف PDF</h3>
-        <p>ارفع ملف PDF يحتوي على أكواد استعلام جديدة — سيتم استخراجها وإضافتها للبحث تلقائياً</p>
-      </div>
-      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">رفع PDF</button>
-      <input type="file" id="fileInput" accept=".pdf"/>
-    </div>
-    <div class="upload-status" id="uploadStatus"></div>
-  </div>
-</div>
-
-<!-- RESULTS HEADER -->
-<div class="res-head" id="resHead">
-  <div class="res-count">نتيجة <span class="num" id="resNum">0</span> من أصل <span class="num" id="resTot">192</span></div>
-  <div class="res-actions">
-    <select class="sort-sel" id="sortSel">
-      <option value="rel">ترتيب: الصلة</option>
-      <option value="name">الاسم أ-ي</option>
-      <option value="code">الكود</option>
-      <option value="cat">التصنيف</option>
-    </select>
-    <button class="btn-exp" id="btnExp">📥 تصدير CSV</button>
-  </div>
-</div>
-
 <!-- CARDS GRID -->
 <div class="cards-grid" id="cardsGrid"></div>
 
