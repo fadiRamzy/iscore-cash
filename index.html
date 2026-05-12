@@ -289,7 +289,6 @@ footer strong{color:var(--text2)}
     <button class="chip" data-f="إسكان وتعمير">إسكان</button>
     <button class="chip" data-f="مستورد من PDF">➕ مضاف من PDF</button>
   </div>
-</div>
 <!-- CARDS GRID -->
 <div class="cards-grid" id="cardsGrid"></div>
 
@@ -768,119 +767,6 @@ document.getElementById('btnExp').onclick=()=>{
   a.click();
   toast('تم تصدير '+currentResults.length+' نتيجة');
 };
-
-// ══ PDF UPLOAD & PARSE ══
-const CODE_REGEX = /\b([A-Z]{2}\d{8}|\d{8}[A-Z]{2})\b/g;
-
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-async function parsePDF(file){
-  const status=document.getElementById('uploadStatus');
-  status.className='upload-status loading';
-  status.textContent='⏳ جاري قراءة الملف وتحليل المحتوى...';
-
-  try{
-    const buf=await file.arrayBuffer();
-    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-    let fullText='';
-
-    for(let p=1;p<=pdf.numPages;p++){
-      const page=await pdf.getPage(p);
-      const tc=await page.getTextContent();
-      fullText+=tc.items.map(i=>i.str).join(' ')+'\n';
-    }
-
-    // Extract lines, then try to find code + name pairs
-    const lines = fullText.split(/[\n\r]+/).map(l=>l.trim()).filter(Boolean);
-    const added=[];
-    const existingCodes=new Set(DATA.map(d=>d.code.toUpperCase()));
-
-    // Strategy: look for CODE + Arabic name pattern on same or adjacent lines
-    const codeLineRe = /([A-Z]{2}\d{8}|\d{8}[A-Z]{2}|\d{6,10}[A-Z]{2}|[A-Z]{2}\d{6,10})/g;
-
-    for(let i=0;i<lines.length;i++){
-      const line=lines[i];
-      const codeMatches=[...line.matchAll(codeLineRe)];
-
-      for(const m of codeMatches){
-        const code=m[0].toUpperCase();
-        if(existingCodes.has(code)) continue;
-
-        // Find a name: could be on same line (before/after code) or adjacent line
-        let name='';
-        const withoutCode=line.replace(code,'').trim();
-        const arabicPart=withoutCode.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
-        if(arabicPart) name=arabicPart.join(' ').trim();
-
-        // If no Arabic on this line, check adjacent
-        if(!name || name.length<3){
-          const prev=i>0?lines[i-1]:'';
-          const next=i<lines.length-1?lines[i+1]:'';
-          const arPrev=prev.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
-          const arNext=next.match(/[\u0600-\u06FF\s\(\)\/\-]+/g);
-          if(arPrev && arPrev.join('').trim().length>3) name=arPrev.join(' ').trim();
-          else if(arNext && arNext.join('').trim().length>3) name=arNext.join(' ').trim();
-        }
-
-        if(!name || name.trim().length<2) name='مؤسسة من '+file.name;
-
-        // Determine category from code suffix
-        const suf=code.slice(-2);
-        const catMap={MF:'تمويل متناهي الصغر',CB:'بنك تجاري',IB:'بنك استثماري',
-          FB:'بنك أجنبي',SB:'بنك متخصص',PC:'بنك عام',RA:'بنك عام',
-          NB:'هيئة ومؤسسة أخرى',FS:'خدمات مالية غير مصرفية',
-          RC:'ائتمان واستهلاك',CR:'ائتمان واستهلاك',IC:'تأمين',
-          UC:'مرافق',MG:'تمويل عقاري',LF:'تأجير تمويلي',HS:'إسكان وتعمير'};
-        const category=catMap[suf]||'مستورد من PDF';
-
-        DATA.push({
-          id:nextId++,
-          name:name.replace(/\s+/g,' ').trim(),
-          code:code,
-          category:category,
-          source:file.name.replace('.pdf','')
-        });
-        existingCodes.add(code);
-        added.push(code);
-      }
-    }
-
-    buildFuse();
-
-    if(added.length>0){
-      status.className='upload-status ok';
-      status.textContent=`✅ تم استخراج ${added.length} كود جديد وإضافتهم للبحث — من ملف: ${file.name}`;
-      toast('تم إضافة '+added.length+' كود جديد');
-      showWelcome();
-    } else {
-      status.className='upload-status err';
-      status.textContent=`⚠️ لم يتم العثور على أكواد جديدة في الملف. تأكد أن الأكواد بصيغة مثل 00020011MF`;
-    }
-  } catch(err){
-    status.className='upload-status err';
-    status.textContent='❌ خطأ في قراءة الملف: '+err.message;
-    console.error(err);
-  }
-}
-
-// File input handler
-document.getElementById('fileInput').onchange=e=>{
-  const f=e.target.files[0];
-  if(f) parsePDF(f);
-  e.target.value='';
-};
-
-// Drag & drop
-const uc=document.getElementById('uploadCard');
-uc.addEventListener('dragover',e=>{e.preventDefault();uc.classList.add('drag')});
-uc.addEventListener('dragleave',()=>uc.classList.remove('drag'));
-uc.addEventListener('drop',e=>{
-  e.preventDefault();uc.classList.remove('drag');
-  const f=e.dataTransfer.files[0];
-  if(f&&f.type==='application/pdf') parsePDF(f);
-  else toast('الرجاء رفع ملف PDF فقط');
-});
-
 // ══ SORT ══
 document.getElementById('sortSel').onchange=()=>{
   const q=document.getElementById('searchInput').value;
