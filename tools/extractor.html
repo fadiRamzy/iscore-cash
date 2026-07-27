@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أداة استخراج البيانات — أكواد الاستعلامات الائتمانية</title>
+<link rel="icon" href="../assets/icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .tool-shell{max-width:820px;margin:0 auto;padding:40px 24px 80px}
+  .drop{
+    border:2px dashed var(--line);border-radius:var(--radius-lg);padding:44px 20px;text-align:center;
+    background:var(--paper-raised);cursor:pointer;transition:border-color .15s;
+  }
+  .drop.drag{border-color:var(--gold-500)}
+  .drop svg{width:44px;height:44px;color:var(--text-3);margin-bottom:10px}
+  .log{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:16px;font-family:monospace;font-size:12.5px;max-height:260px;overflow:auto;margin-top:18px;
+    color:var(--text-2);white-space:pre-wrap;
+  }
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{
+    border:0;background:var(--navy-900);color:#fff;padding:11px 20px;border-radius:10px;
+    cursor:pointer;font-weight:700;font-size:13.5px;
+  }
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text-1)}
+  .tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .tab-btn{
+    background:none;border:0;padding:10px 4px;margin-left:18px;font-size:14px;font-weight:700;
+    color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--navy-900);border-color:var(--gold-500)}
+  :root[data-theme="dark"] .tab-btn.active{color:var(--gold-400)}
+  .panel{display:none}
+  .panel.active{display:block}
+  .client-card{
+    display:flex;flex-wrap:wrap;gap:22px;background:var(--paper-raised);border:1px solid var(--line);
+    border-radius:var(--radius-md);padding:16px 20px;margin-top:20px;
+  }
+  .client-item .label{font-size:11.5px;color:var(--text-3);margin-bottom:2px}
+  .client-item .value{font-size:14.5px;font-weight:700;color:var(--text-1)}
+  .facilities-wrap{margin-top:16px;border:1px solid var(--line);border-radius:var(--radius-md);overflow:auto;background:var(--paper-raised)}
+  .facilities-wrap table{width:100%;border-collapse:collapse;font-size:13px}
+  .facilities-wrap thead th{position:sticky;top:0;background:var(--navy-900);color:#f0f3f9;padding:10px 8px;text-align:center;font-weight:700}
+  .facilities-wrap tbody td{padding:9px 8px;text-align:center;border-top:1px solid var(--line)}
+  .badge-status{padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;color:#fff;display:inline-block}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-title">أداة استخراج البيانات</span>
+      <span class="brand-sub">تحديث الأكواد وتحليل تقارير آيسكور</span>
+    </div>
+    <div class="topbar-actions"><a href="../index.html" class="icon-btn" title="رجوع للنظام" aria-label="رجوع">↩</a></div>
+  </div>
+</header>
+
+<div class="tool-shell">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="extract">تحديث أكواد الاستعلام</button>
+    <button class="tab-btn" data-tab="iscore">تحليل تقرير ائتماني (آيسكور)</button>
+  </div>
+
+  <div class="panel active" id="panel-extract">
+  <p style="color:var(--text-2);font-size:13.5px;margin-bottom:20px">
+    ارفع ملف PDF بنفس تنسيق ملف "أكواد الاستعلام الائتماني". ستقوم الأداة باستخراج الأكواد والأسماء تلقائيًا،
+    وعرض معاينة، ثم السماح بتنزيل ملف <code>codes.json</code> جديد لاستبداله داخل مجلد <code>data</code>.
+  </p>
+
+  <div class="drop" id="drop">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+    <div>اسحب ملف PDF هنا أو اضغط للاختيار</div>
+    <input type="file" id="file-input" accept="application/pdf" style="display:none">
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="download-btn" disabled>تنزيل codes.json</button>
+    <button class="btn secondary" id="clear-btn">مسح</button>
+  </div>
+
+  <div class="log" id="log">في انتظار رفع ملف…</div>
+  </div>
+
+  <div class="panel" id="panel-iscore">
+  <p style="color:var(--text-2);font-size:13.5px;margin-bottom:20px">
+    ارفع ملف تقرير ائتماني من آيسكور (PDF). ستقوم الأداة بقراءة أكواد الجهات وترجمتها لأسماء، وتلخيص التسهيلات
+    (الجهة، نوع التسهيل، تاريخ المنح، المبلغ الممنوح، والتأخيرات إن وُجدت) في جدول واحد منظم.
+  </p>
+
+  <div class="drop" id="drop-iscore">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+    <div>اسحب ملف تقرير آيسكور (PDF) هنا أو اضغط للاختيار</div>
+    <input type="file" id="file-input-iscore" accept="application/pdf" style="display:none">
+  </div>
+
+  <div class="actions">
+    <button class="btn secondary" id="clear-btn-iscore">مسح</button>
+  </div>
+
+  <div class="log" id="log-iscore">في انتظار رفع ملف…</div>
+
+  <div id="iscore-results" style="display:none">
+    <div class="client-card">
+      <div class="client-item"><div class="label">اسم العميل</div><div class="value" id="c-name">—</div></div>
+      <div class="client-item"><div class="label">الرقم القومي</div><div class="value" id="c-id">—</div></div>
+      <div class="client-item"><div class="label">التقييم الائتماني</div><div class="value" id="c-score">—</div></div>
+      <div class="client-item"><div class="label">عدد التسهيلات</div><div class="value" id="c-count">—</div></div>
+    </div>
+    <div class="facilities-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>الجهة</th><th>كود الجهة</th><th>نوع التسهيل</th>
+          <th>تاريخ المنح</th><th>المبلغ الممنوح</th><th>الحالة</th><th>التأخير</th>
+        </tr></thead>
+        <tbody id="facilities-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const CATEGORY_MAP = {
+  PC:"بنوك عامة", SB:"بنوك متخصصة", CB:"بنوك تجارية", IB:"بنوك استثمارية",
+  FB:"بنوك أجنبية", CC:"شركات ائتمان استهلاكي", RC:"شركات ائتمان وتقسيط",
+  MF:"تمويل متناهي الصغر وجمعيات", MG:"شركات تمويل عقاري", LF:"شركات تأجير تمويلي",
+  HS:"شركات إسكان وتعمير", FS:"خدمات مالية غير مصرفية", NB:"هيئات ومؤسسات أخرى",
+  NG:"هيئات ومؤسسات أخرى", RA:"جهات رقابية", UC:"شركات مرافق", IC:"تأمين",
+};
+function categoryFor(code){
+  const suffix = code.replace(/[^A-Za-z]/g,"").slice(-2).toUpperCase();
+  return CATEGORY_MAP[suffix] || "أخرى";
+}
+
+const log = document.getElementById("log");
+const downloadBtn = document.getElementById("download-btn");
+const drop = document.getElementById("drop");
+const input = document.getElementById("file-input");
+let generated = null;
+
+function print(msg){ log.textContent += "\n" + msg; log.scrollTop = log.scrollHeight; }
+
+drop.addEventListener("click", () => input.click());
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+drop.addEventListener("drop", (e) => {
+  e.preventDefault(); drop.classList.remove("drag");
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+input.addEventListener("change", () => { if (input.files[0]) handleFile(input.files[0]); });
+
+document.getElementById("clear-btn").addEventListener("click", () => {
+  log.textContent = "في انتظار رفع ملف…";
+  downloadBtn.disabled = true;
+  generated = null;
+});
+
+async function handleFile(file){
+  log.textContent = `جارٍ قراءة الملف: ${file.name}`;
+  try{
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    print(`عدد الصفحات: ${pdf.numPages}`);
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map((it) => it.str).join(" ") + "\n";
+    }
+    const records = extractRecords(fullText);
+    print(`تم استخراج ${records.length} سجلًا`);
+    generated = {
+      generatedAt: new Date().toISOString().slice(0,10),
+      totalRecords: records.length,
+      records,
+    };
+    downloadBtn.disabled = records.length === 0;
+  }catch(err){
+    print("خطأ أثناء المعالجة: " + err.message);
+  }
+}
+
+// Matches a 10-char alphanumeric code (digits + 2 letters suffix) beside Arabic text,
+// in either "code name" or "name code" order.
+function extractRecords(text){
+  const codeRe = /\b(\d{6,8}[A-Z]{2})\b/g;
+  const lines = text.split(/\n|(?=\d{6,8}[A-Z]{2})/).map((l) => l.trim()).filter(Boolean);
+  const seen = new Set();
+  const records = [];
+  for (const line of lines){
+    const matches = [...line.matchAll(codeRe)];
+    if (matches.length === 0) continue;
+    const code = matches[0][1];
+    const name = line.replace(codeRe, "").replace(/\s+/g, " ").trim();
+    if (!name) continue;
+    const key = code + "|" + name;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    records.push({ code, name, category: categoryFor(code) });
+  }
+  records.sort((a,b) => a.category.localeCompare(b.category,"ar") || a.code.localeCompare(b.code));
+  return records;
+}
+
+downloadBtn.addEventListener("click", () => {
+  if (!generated) return;
+  const blob = new Blob([JSON.stringify(generated, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "codes.json"; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ===================== Tabs ===================== */
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ===================== iScore report analyzer ===================== */
+let codesLookup = null;
+async function getCodesLookup() {
+  if (codesLookup) return codesLookup;
+  const res = await fetch("../data/codes.json");
+  const db = await res.json();
+  codesLookup = new Map();
+  for (const r of db.records) codesLookup.set(canon(r.code), r);
+  return codesLookup;
+}
+function canon(code) {
+  const letters = (code.match(/[A-Za-z]+/g) || []).join("").toUpperCase();
+  const digits = (code.match(/\d+/g) || []).join("");
+  return letters + digits;
+}
+function collapse(t) { return t.replace(/\s+/g, " ").trim(); }
+
+const ARABIC_MONTHS = "يناير|فبراير|مارس|أبريل|إبريل|ابريل|مايو|يونيو|يوليو|أغسطس|اغسطس|سبتمبر|أكتوبر|اكتوبر|نوفمبر|ديسمبر";
+
+function parseDetailed(rawText, lookup) {
+  const parts = rawText.split(/(?=التسهيل ائتماني\s*\d+\s*\|)/);
+  const facilities = [];
+  for (const part of parts) {
+    const seg = collapse(part);
+    const header = seg.match(/التسهيل ائتماني\s*(\d+)\s*\|\s*([^\|]+?)\s*\|\s*تاريخ اخر اقرار[^ك]*?كود الجهة\s*:\s*([A-Za-z0-9]{6,12})/);
+    if (!header) continue;
+    const [, , type, code] = header;
+    const dateAmount = seg.match(new RegExp(`-\\s*(\\d{1,2})\\s*(${ARABIC_MONTHS})\\s*(\\d{4})\\s*-\\s*جنيه\\s*مي\\s+([\\d,]+)`));
+    let date = "غير محدد", amount = "غير محدد";
+    if (dateAmount) { date = `${dateAmount[1]} ${dateAmount[2]} ${dateAmount[3]}`; amount = dateAmount[4]; }
+    const statusMatch = seg.match(/(?<![\u0600-\u06FF])(ساري|مغلق|معلق)(?![\u0600-\u06FF])/);
+    const regularityMatch = seg.match(/(?<![\u0600-\u06FF])(منتظم|متأخر)(?![\u0600-\u06FF])/);
+    const bucketMatch = seg.match(/حتى\s*(\d+)[^\d]{0,3}يوم/);
+    const info = lookup.get(canon(code));
+    facilities.push({
+      code, name: info ? info.name : "غير معروف",
+      type: type.trim(), date, amount,
+      status: statusMatch ? statusMatch[1] : "غير محدد",
+      delay: regularityMatch ? (regularityMatch[1] === "متأخر" ? `متأخر (حتى ${bucketMatch ? bucketMatch[1] : "؟"} يوم)` : "منتظم") : "غير محدد",
+    });
+  }
+  return facilities;
+}
+
+function parseSummary(rawText, lookup) {
+  const text = collapse(rawText);
+  const facilities = [];
+  const closedBlock = text.match(/التسھيلات المغلقة([\s\S]*?)(?=التسھيلات السارية|$)/) || text.match(/التسهيلات المغلقة([\s\S]*?)(?=التسهيلات السارية|$)/);
+  if (closedBlock) {
+    const re = /(مغلق|ساري|معلق)\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+([A-Za-z0-9]{6,12})\s+([\d,]+)\s+(\d+)\s+(\d+)\s+(\d+)/g;
+    let m;
+    while ((m = re.exec(closedBlock[1]))) {
+      const [, status, closeDate, code, amount, , delayDays] = m;
+      const info = lookup.get(canon(code));
+      facilities.push({
+        code, name: info ? info.name : "غير معروف", type: "تسهيل مغلق",
+        date: closeDate, amount, status,
+        delay: Number(delayDays) > 0 ? `متأخر (${delayDays} يوم)` : "منتظم",
+      });
+    }
+  }
+  const activeBlock = text.match(/التسھيلات السارية([\s\S]*?)(?=الإجراءات القانونية|$)/) || text.match(/التسهيلات السارية([\s\S]*?)(?=الإجراءات القانونية|$)/);
+  if (activeBlock) {
+    const re = /(\d{1,2}\/\d{1,2}\/\d{4})\s+([A-Za-z0-9]{6,12})\s+([^\d]+?)\s+([\d,]+)\s+(لا يوجد|\d+)\s+([\d,]+)\s+([\d,]+)\s+(\d+)\s+(\d+)\s+(لا يوجد|\d+)\s+([\d,]+)\s+(\d{1,2}\/\d{1,2}\/\d{4})/g;
+    let m;
+    while ((m = re.exec(activeBlock[1]))) {
+      const [, approvalDate, code, facilityType, amount, , , , delayDays] = m;
+      const info = lookup.get(canon(code));
+      facilities.push({
+        code, name: info ? info.name : "غير معروف", type: facilityType.trim(),
+        date: approvalDate, amount, status: "ساري",
+        delay: Number(delayDays) > 0 ? `متأخر (${delayDays} يوم)` : "منتظم",
+      });
+    }
+  }
+  return facilities;
+}
+
+function extractClientInfo(rawText) {
+  const text = collapse(rawText);
+  const idMatch = text.match(/\b(\d{14})\b/);
+  let name = null, score = null;
+
+  const labelIdx = text.indexOf(": اسم");
+  if (labelIdx !== -1) {
+    const before = text.slice(0, labelIdx).trim().split(/\s+/);
+    name = before.slice(-4).join(" ");
+  }
+  const scoreNear = text.match(/(?:التقييم الرقمي|التقييم ائتماني|التقييم الائتماني)[\s\S]{0,20}?([3-8]\d{2})\b/);
+  if (scoreNear) score = scoreNear[1];
+
+  if (!name || !score) {
+    const rowMatch = text.match(/([3-8]\d{2})\s+([\u0600-\u06FF][\u0600-\u06FF\s]+?)\s+(\d{14})/);
+    if (rowMatch) {
+      if (!score) score = rowMatch[1];
+      if (!name) {
+        const words = rowMatch[2].trim().split(/\s+/);
+        name = (words.length % 2 === 0 && words.length >= 4) ? words.slice(words.length / 2).join(" ") : rowMatch[2].trim();
+      }
+    }
+  }
+  return { name: name || "غير متعرف عليه", score: score || "—", nationalId: idMatch ? idMatch[1] : "—" };
+}
+
+function statusColor(status) {
+  if (status === "ساري") return "#1e8f5f";
+  if (status === "مغلق") return "#54606f";
+  return "#c07a12";
+}
+function delayColor(delay) {
+  return delay.startsWith("متأخر") ? "#b23b3b" : "#1e8f5f";
+}
+
+async function handleIscoreFile(file) {
+  const log2 = document.getElementById("log-iscore");
+  document.getElementById("iscore-results").style.display = "none";
+  log2.textContent = `جارٍ قراءة الملف: ${file.name}`;
+  try {
+    const lookup = await getCodesLookup();
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map((it) => it.str).join(" ") + "\n";
+    }
+
+    let facilities = [];
+    if (/التسهيل ائتماني\s*\d+\s*\|/.test(fullText)) {
+      facilities = facilities.concat(parseDetailed(fullText, lookup));
+    }
+    if (/التسھيلات المغلقة|التسهيلات المغلقة|التسھيلات السارية|التسهيلات السارية/.test(fullText)) {
+      facilities = facilities.concat(parseSummary(fullText, lookup));
+    }
+
+    const client = extractClientInfo(fullText);
+
+    log2.textContent += `\nتم العثور على ${facilities.length} تسهيل/تسهيلات.`;
+    if (facilities.length === 0) {
+      log2.textContent += "\nتعذر التعرف على تنسيق الجدول تلقائيًا. راجع الملف يدويًا للتأكد من صحة البيانات.";
+      return;
+    }
+
+    document.getElementById("c-name").textContent = client.name;
+    document.getElementById("c-id").textContent = client.nationalId;
+    document.getElementById("c-score").textContent = client.score;
+    document.getElementById("c-count").textContent = facilities.length;
+
+    const tbody = document.getElementById("facilities-tbody");
+    tbody.innerHTML = facilities.map((f, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${f.name}</td>
+        <td style="font-family:monospace">${f.code}</td>
+        <td>${f.type}</td>
+        <td>${f.date}</td>
+        <td>${f.amount}</td>
+        <td><span class="badge-status" style="background:${statusColor(f.status)}">${f.status}</span></td>
+        <td><span class="badge-status" style="background:${delayColor(f.delay)}">${f.delay}</span></td>
+      </tr>`).join("");
+
+    document.getElementById("iscore-results").style.display = "block";
+    log2.textContent += "\nتم تجهيز الجدول بنجاح.";
+  } catch (err) {
+    log2.textContent += "\nخطأ أثناء المعالجة: " + err.message;
+  }
+}
+
+const dropIscore = document.getElementById("drop-iscore");
+const inputIscore = document.getElementById("file-input-iscore");
+dropIscore.addEventListener("click", () => inputIscore.click());
+dropIscore.addEventListener("dragover", (e) => { e.preventDefault(); dropIscore.classList.add("drag"); });
+dropIscore.addEventListener("dragleave", () => dropIscore.classList.remove("drag"));
+dropIscore.addEventListener("drop", (e) => {
+  e.preventDefault(); dropIscore.classList.remove("drag");
+  if (e.dataTransfer.files[0]) handleIscoreFile(e.dataTransfer.files[0]);
+});
+inputIscore.addEventListener("change", () => { if (inputIscore.files[0]) handleIscoreFile(inputIscore.files[0]); });
+document.getElementById("clear-btn-iscore").addEventListener("click", () => {
+  document.getElementById("log-iscore").textContent = "في انتظار رفع ملف…";
+  document.getElementById("iscore-results").style.display = "none";
+});
+</script>
+</body>
+</html>
